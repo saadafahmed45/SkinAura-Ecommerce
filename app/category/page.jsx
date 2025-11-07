@@ -38,7 +38,7 @@ const Category = () => {
       </h2>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-        {categories.map(({ id, name, image }) => (
+        {categories.slice(0, 4).map(({ id, name, image }) => (
           <Link key={id} href={`/category/${id}`}>
             <div className="relative group cursor-pointer overflow-hidden rounded-xl shadow-lg transition-transform transform hover:scale-105">
               <img
