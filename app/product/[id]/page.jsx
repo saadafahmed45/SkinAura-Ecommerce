@@ -1,6 +1,7 @@
 "use client";
 
 import { skincareProducts } from "@/app/api/skinData";
+import ProductCard from "@/app/components/ProductCard";
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
 import { use } from "react";
@@ -29,7 +30,7 @@ const ProductDetails = ({ params }) => {
   }
 
   return (
-    <div className="px-6 lg:px-12 py-16 max-w-7xl mx-auto">
+    <div className="px-6 lg:px-24 py-16 mx-auto">
       {/* Breadcrumb */}
       <nav className="text-sm text-gray-500 mb-8">
         <ul className="flex items-center space-x-2">
@@ -52,7 +53,7 @@ const ProductDetails = ({ params }) => {
         {/* Image Gallery */}
         <div className="flex flex-col gap-4">
           {/* Main Image */}
-          <div className="border rounded-2xl overflow-hidden shadow-lg">
+          <div className=" rounded-2xl overflow-hidden shadow-lg">
             <img
               src={selectedImage}
               alt={product.name}
@@ -169,24 +170,8 @@ const ProductDetails = ({ params }) => {
           <h2 className="text-3xl font-bold mb-8">Related Products</h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
-            {relatedProducts.map((item) => (
-              <Link key={item.id} href={`/product/${item.id}`}>
-                <div className="bg-white border rounded-2xl shadow-md hover:shadow-xl transition overflow-hidden group cursor-pointer">
-                  <div className="h-56 overflow-hidden">
-                    <img
-                      src={item.images[0]}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                  </div>
-                  <div className="p-4">
-                    <h3 className="font-semibold truncate">{item.name}</h3>
-                    <p className="text-blue-600 font-bold">${item.price}</p>
-                    <button className="mt-2 w-full bg-blue-600 text-white py-2 rounded-lg text-sm">
-                      View Details
-                    </button>
-                  </div>
-                </div>
-              </Link>
+            {relatedProducts.map((product) => (
+              <ProductCard product={product} key={product.id} />
             ))}
           </div>
         </div>

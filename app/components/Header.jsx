@@ -40,7 +40,7 @@ const Header = () => {
             src="https://merakiui.com/images/full-logo.svg"
             alt="Logo"
           /> */}
-          <h2>Skin Care</h2>
+          <h2>SkinAura</h2>
         </Link>
 
         {/* Hamburger button */}
