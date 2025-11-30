@@ -1,5 +1,4 @@
-{"variant":"standard","title":"README for Glow Haven","id":"53901"}
-# Glow Haven — Skincare eCommerce (Next.js + Tailwind)
+# SkinAura — Skincare eCommerce (Next.js + Tailwind)
 
 A modern, responsive skincare storefront built with Next.js (App Router), React, and Tailwind CSS. Ships with a local product API (`/app/api/skinData.js`) containing curated skincare items (cleansers, serums, creams, sunscreens, K-Beauty, etc.), category pages, and premium product cards.
 
