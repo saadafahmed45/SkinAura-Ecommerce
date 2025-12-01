@@ -7,6 +7,7 @@ import {
   FaRegStar,
   FaShoppingCart,
 } from "react-icons/fa";
+import { useCart } from "../context/CartContext";
 
 const ProductCard = ({ product }) => {
   const {
@@ -22,6 +23,13 @@ const ProductCard = ({ product }) => {
     stock,
     brand,
   } = product;
+
+  const { handleAddedCart } = useCart();
+
+  const handleAddToCart = (e) => {
+    e.preventDefault();
+    handleAddedCart(product);
+  };
 
   const renderStars = (rating) => {
     const stars = [];
@@ -120,6 +128,7 @@ const ProductCard = ({ product }) => {
 
       {/* Floating Add to Cart */}
       <button
+        onClick={handleAddToCart}
         disabled={!inStock}
         className={`absolute bottom-4 right-4 z-20 opacity-0 group-hover:opacity-100 transition duration-300 px-3 py-2 rounded-lg text-sm font-bold shadow-md flex items-center gap-2 ${
           inStock

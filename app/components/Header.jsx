@@ -4,10 +4,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import { FiMenu, FiX, FiShoppingCart } from "react-icons/fi";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useCart } from "../context/CartContext";
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
+  const { cartItems } = useCart();
 
   const navLinks = [
     { name: "Home", href: "/" },
@@ -40,7 +42,7 @@ const Header = () => {
             src="https://merakiui.com/images/full-logo.svg"
             alt="Logo"
           /> */}
-          <h2>SkinAura</h2>
+          <h2 className="text-2xl font-extralight">SkinAura</h2>
         </Link>
 
         {/* Hamburger button */}
@@ -73,7 +75,7 @@ const Header = () => {
           >
             <FiShoppingCart size={20} />
             <span className="absolute -top-2 -right-2 bg-blue-500 text-white text-xs px-1 rounded-full">
-              1
+              {cartItems.length}
             </span>
           </Link>
         </div>
@@ -113,7 +115,7 @@ const Header = () => {
               >
                 <FiShoppingCart size={20} />
                 <span className="absolute -top-2 left-3 bg-blue-500 text-white text-xs px-1 rounded-full">
-                  1
+                  {cartItems.length}
                 </span>
               </Link>
             </div>

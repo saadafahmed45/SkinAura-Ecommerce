@@ -2,6 +2,7 @@
 
 import { skincareProducts } from "@/app/api/skinData";
 import ProductCard from "@/app/components/ProductCard";
+import { useCart } from "@/app/context/CartContext";
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
 import { use } from "react";
@@ -11,6 +12,12 @@ const ProductDetails = ({ params }) => {
   const { id } = React.use(params); // slug
   const product = skincareProducts.find((m) => m.id === parseInt(id));
 
+  const { handleAddedCart } = useCart();
+
+  const handleAddToCart = (e) => {
+    e.preventDefault();
+    handleAddedCart(product);
+  };
   // Fix: selected image state
   const [selectedImage, setSelectedImage] = useState(
     product?.images?.[0] || ""
@@ -154,7 +161,10 @@ const ProductDetails = ({ params }) => {
 
           {/* Buttons */}
           <div className="flex gap-4 mt-4">
-            <button className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-lg font-semibold">
+            <button
+              onClick={handleAddToCart}
+              className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-lg font-semibold"
+            >
               Add to Cart
             </button>
             <button className="border border-gray-300 px-6 py-3 rounded-lg font-semibold">
@@ -169,7 +179,7 @@ const ProductDetails = ({ params }) => {
         <div>
           <h2 className="text-3xl font-bold mb-8">Related Products</h2>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-8">
             {relatedProducts.map((product) => (
               <ProductCard product={product} key={product.id} />
             ))}
