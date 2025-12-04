@@ -37,7 +37,7 @@ const ProductDetails = ({ params }) => {
   }
 
   return (
-    <div className="px-6 lg:px-24 py-16 mx-auto">
+    <div className="px-6 lg:px-24 py-16 mx-auto mt-10">
       {/* Breadcrumb */}
       <nav className="text-sm text-gray-500 mb-8">
         <ul className="flex items-center space-x-2">
@@ -47,7 +47,14 @@ const ProductDetails = ({ params }) => {
             </Link>
           </li>
           <li>/</li>
-          <li className="capitalize">{product.category}</li>
+          <li>
+            <Link
+              href={`/category/${product.category}`}
+              className="hover:text-blue-600"
+            >
+              {product.category}
+            </Link>
+          </li>
           <li>/</li>
           <li className="text-gray-800 font-medium truncate max-w-[150px]">
             {product.name}
