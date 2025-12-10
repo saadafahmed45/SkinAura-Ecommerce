@@ -76,18 +76,24 @@ const ProductDetails = ({ params }) => {
           </div>
 
           {/* Thumbnails */}
-          <div className="flex gap-3">
+          <div className="flex flex-wrap gap-3 mt-3">
             {product.images?.map((img, i) => (
               <button
                 key={i}
                 onClick={() => setSelectedImage(img)}
-                className={`w-20 h-20 border rounded-xl overflow-hidden ${
-                  selectedImage === img
-                    ? "ring-2 ring-blue-500"
-                    : "hover:ring-2 hover:ring-gray-300"
-                }`}
+                className={`relative w-20 h-20 sm:w-24 sm:h-24 border rounded-xl overflow-hidden flex items-center justify-center bg-gray-50 transition
+        ${
+          selectedImage === img
+            ? "ring-2 ring-blue-500 border-blue-500"
+            : "hover:ring-2 hover:ring-gray-300"
+        }`}
               >
-                <img src={img} className="w-full h-full object-cover" />
+                <img
+                  src={img}
+                  alt={`Thumbnail ${i + 1}`}
+                  loading="lazy"
+                  className="w-full h-full object-cover object-center"
+                />
               </button>
             ))}
           </div>
