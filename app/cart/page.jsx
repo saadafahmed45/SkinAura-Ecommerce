@@ -1,7 +1,6 @@
 "use client";
 
 import { FaTrash, FaHeart } from "react-icons/fa";
-import Image from "next/image";
 import Link from "next/link";
 import { useCart } from "../context/CartContext";
 
@@ -17,7 +16,7 @@ export default function Cart() {
   } = useCart();
 
   return (
-    <div className="max-w-5xl mx-auto py-24 my-8 px-6 lg:px-12 bg-blue-50 rounded-2xl shadow-lg">
+    <div className="max-w-5xl mx-auto py-24 my-8 px-6 lg:px-12 bg-blue-50 rounded-2xl shadow-lg mt-24">
       <h2 className="text-3xl font-bold mb-8 text-gray-900 border-b pb-3">
         Your Cart
       </h2>
@@ -28,7 +27,7 @@ export default function Cart() {
           <p className="text-xl">Your cart is empty 😔</p>
           <Link
             href="/"
-            className="mt-4 inline-block bg-blue-500 text-white px-6 py-3 rounded-lg hover:blue-700 transition"
+            className="mt-4 inline-block bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition"
           >
             Go Shopping
           </Link>
@@ -42,42 +41,56 @@ export default function Cart() {
             key={item.id}
             className="flex items-center justify-between p-4 rounded-xl border bg-white hover:shadow-md transition"
           >
+            {/* Left */}
             <div className="flex items-center gap-4">
-              <div className="relative w-20 h-20 rounded-lg overflow-hidden bg-gray-100">
-                <img
-                  src={item?.images?.[0]}
-                  alt={item.name}
-                  className="object-cover"
-                />
-              </div>
+              <img
+                src={item?.images?.[0]}
+                alt={item.name}
+                className="w-20 h-20 rounded-lg object-cover bg-gray-100"
+              />
 
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">
-                  {item.name}
-                </h3>
-                <p className="text-sm text-gray-500">{item.color}</p>
+                <h3 className="text-lg font-semibold">{item.name}</h3>
 
-                <div className="flex items-center gap-2 mt-1">
-                  <span className="text-lg font-bold text-blue-500">
-                    €{item.discountPrice}
-                  </span>
-                  <span className="line-through text-sm text-gray-400">
-                    €{item.price}
-                  </span>
+                <p className="text-blue-500 font-bold">
+                  €{item.price.toFixed(2)}
+                </p>
+
+                {/* Quantity Controls ✅ */}
+                <div className="flex items-center gap-3 mt-2">
+                  <button
+                    onClick={() => decrementQuantity(item.id)}
+                    className="w-8 h-8 rounded-full border text-lg hover:bg-gray-100"
+                  >
+                    −
+                  </button>
+
+                  <span className="font-semibold text-lg">{item.quantity}</span>
+
+                  <button
+                    onClick={() => incrementQuantity(item.id)}
+                    className="w-8 h-8 rounded-full border text-lg hover:bg-gray-100"
+                  >
+                    +
+                  </button>
                 </div>
               </div>
             </div>
 
-            {/* Right side buttons */}
+            {/* Right */}
             <div className="flex flex-col items-end gap-3">
+              <p className="font-semibold text-gray-800">
+                €{item.totalPrice.toFixed(2)}
+              </p>
+
               <button
                 onClick={() => removeFromCart(item.id)}
-                className="flex items-center text-red-500 hover:text-red-600 transition"
+                className="flex items-center text-red-500 hover:text-red-600"
               >
                 <FaTrash className="mr-2" /> Remove
               </button>
 
-              <button className="flex items-center text-blue-500 hover:text-blue-600 transition">
+              <button className="flex items-center text-blue-500 hover:text-blue-600">
                 <FaHeart className="mr-2" /> Favorite
               </button>
             </div>
@@ -88,15 +101,17 @@ export default function Cart() {
       {/* Totals */}
       {cartItems.length > 0 && (
         <div className="mt-10 border-t pt-6">
-          <div className="flex justify-between text-lg text-gray-700 mb-2">
+          <div className="flex justify-between text-lg mb-2">
             <span>Subtotal</span>
-            <span className="font-semibold">€{subtotal.toFixed(2)}</span>
+            <span>€{subtotal.toFixed(2)}</span>
           </div>
-          <div className="flex justify-between text-lg text-gray-700 mb-2">
+
+          <div className="flex justify-between text-lg mb-2">
             <span>Delivery Fee</span>
-            <span className="font-semibold">€{deliveryFee.toFixed(2)}</span>
+            <span>€{deliveryFee.toFixed(2)}</span>
           </div>
-          <div className="flex justify-between text-xl font-bold text-gray-900 mt-3">
+
+          <div className="flex justify-between text-xl font-bold mt-3">
             <span>Total</span>
             <span>€{total.toFixed(2)}</span>
           </div>
@@ -104,13 +119,13 @@ export default function Cart() {
           <div className="flex justify-between items-center mt-8">
             <Link
               href="/"
-              className="px-5 py-2 border rounded-lg text-gray-700 hover:bg-gray-100 transition"
+              className="px-5 py-2 border rounded-lg hover:bg-gray-100"
             >
               Back to Shop
             </Link>
 
-            <button className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
-              Checkout
+            <button className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+              <Link href={"/cart/checkout"}>Checkout </Link>
             </button>
           </div>
         </div>
