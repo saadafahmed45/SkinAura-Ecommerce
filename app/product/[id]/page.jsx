@@ -4,8 +4,7 @@ import { skincareProducts } from "@/app/api/skinData";
 import ProductCard from "@/app/components/ProductCard";
 import { useCart } from "@/app/context/CartContext";
 import Link from "next/link";
-import React, { useState, useEffect } from "react";
-import { use } from "react";
+import React, { useState } from "react";
 
 const ProductDetails = ({ params }) => {
   // const { id } = params;
@@ -23,11 +22,6 @@ const ProductDetails = ({ params }) => {
     product?.images?.[0] || ""
   );
 
-  // Fix: related products by category
-  const relatedProducts = skincareProducts
-    .filter((m) => m.category === product.category && m.id !== product.id)
-    .slice(0, 4);
-
   if (!product) {
     return (
       <div className="h-screen flex items-center justify-center">
@@ -35,6 +29,11 @@ const ProductDetails = ({ params }) => {
       </div>
     );
   }
+
+  // Fix: related products by category
+  const relatedProducts = skincareProducts
+    .filter((m) => m.category === product.category && m.id !== product.id)
+    .slice(0, 4);
 
   return (
     <div className="px-6 lg:px-24 py-16 mx-auto mt-10">
@@ -176,9 +175,14 @@ const ProductDetails = ({ params }) => {
           <div className="flex gap-4 mt-4">
             <button
               onClick={handleAddToCart}
-              className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-lg font-semibold"
+              disabled={!product.inStock}
+              className={`px-6 py-3 rounded-lg font-semibold ${
+                product.inStock
+                  ? "bg-blue-600 hover:bg-blue-500 text-white"
+                  : "bg-gray-300 text-gray-600 cursor-not-allowed"
+              }`}
             >
-              Add to Cart
+              {product.inStock ? "Add to Cart" : "Unavailable"}
             </button>
             <button className="border border-gray-300 px-6 py-3 rounded-lg font-semibold">
               Buy Now
