@@ -1,1 +1,45 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300&display=swap');
+
 @import "tailwindcss";
+
+@theme {
+  --font-serif: "Cormorant Garamond", Georgia, serif;
+  --font-sans: "Plus Jakarta Sans", sans-serif;
+  
+  --color-skin-cream: #FCFAF7;
+  --color-skin-sand: #F5EFE6;
+  --color-skin-charcoal: #2A2925;
+  --color-skin-sage: #7D8C77;
+  --color-skin-terracotta: #C68B6E;
+  --color-skin-gold: #D4AF37;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--color-skin-cream);
+  color: var(--color-skin-charcoal);
+  min-height: 100vh;
+}
+
+h1, h2, h3, .font-serif-brand {
+  font-family: var(--font-serif);
+}
+
+/* Custom marquee keyframes since marquee isn't pre-configured in tailwind */
+@keyframes marquee {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  display: inline-flex;
+  animation: marquee 25s linear infinite;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}

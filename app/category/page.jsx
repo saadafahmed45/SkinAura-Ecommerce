@@ -1,60 +1,53 @@
 "use client";
-import axios from "axios";
+
 import Link from "next/link";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { categories } from "../api/categories";
 
 const Category = () => {
-  // const [categories, setCategories] = useState(categories);
-  // const [loading, setLoading] = useState(true);
-
-  // // useEffect(() => {
-  // //   const fetchCategories = async () => {
-  // //     try {
-  // //       const response = await axios.get(
-  // //         "https://api.escuelajs.co/api/v1/categories"
-  // //       );
-  // //       setCategories(response.data);
-  // //     } catch (error) {
-  // //       console.error("Error fetching categories:", error);
-  // //     } finally {
-  // //       setLoading(false);
-  // //     }
-  // //   };
-  // //   fetchCategories();
-  // // }, []);
-
-  // if (loading) {
-  //   return (
-  //     <div className="flex items-center justify-center h-64">
-  //       <p className="text-gray-500">Loading categories...</p>
-  //     </div>
-  //   );
-  // }
-
   const catagoryData = categories;
 
   return (
-    <div className="px-8 lg:px-24 py-12">
-      <h2 className="text-4xl font-bold text-center mb-12 text-gray-800">
-        Product Categories
-      </h2>
+    <div className="px-6 md:px-12 lg:px-20 py-20 bg-skin-cream/10">
+      <div className="max-w-7xl mx-auto space-y-12">
+        {/* Title */}
+        <div className="text-center space-y-2 max-w-lg mx-auto">
+          <span className="text-xs uppercase tracking-widest text-skin-terracotta font-bold">Discover</span>
+          <h2 className="text-3xl md:text-5xl font-serif text-skin-charcoal font-medium">
+            Shop by Category
+          </h2>
+          <p className="text-sm text-skin-charcoal/60 leading-relaxed font-light">
+            Formulated solutions designed to address specific concerns and elevate your daily skincare routine.
+          </p>
+        </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-        {catagoryData.slice(0, 4).map(({ id, name, image }) => (
-          <Link key={id} href={`/category/${name}`}>
-            <div className="relative group cursor-pointer overflow-hidden rounded-xl shadow-lg transition-transform transform hover:scale-105">
-              <img
-                src={image}
-                alt={name}
-                className="w-full h-64 object-cover transition duration-500 group-hover:scale-110"
-              />
-              <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-300">
-                <h3 className="text-white text-2xl font-semibold">{name}</h3>
+        {/* Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {catagoryData.slice(0, 4).map(({ id, name, description, image }) => (
+            <Link key={id} href={`/category/${name}`}>
+              <div className="group relative cursor-pointer overflow-hidden rounded-2xl border border-skin-sand/35 bg-white shadow-sm hover:shadow-md transition-all duration-300">
+                {/* Image Container */}
+                <div className="w-full h-80 overflow-hidden relative">
+                  <img
+                    src={image}
+                    alt={name}
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  />
+                  {/* Subtle Vignette Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-skin-charcoal/60 via-transparent to-transparent opacity-80"></div>
+                </div>
+
+                {/* Content Overlay */}
+                <div className="absolute bottom-0 inset-x-0 p-5 text-white flex flex-col justify-end">
+                  <h3 className="text-xl font-serif tracking-wide font-medium">{name}</h3>
+                  <p className="text-[10px] text-skin-sand/80 uppercase tracking-widest mt-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    {description}
+                  </p>
+                </div>
               </div>
-            </div>
-          </Link>
-        ))}
+            </Link>
+          ))}
+        </div>
       </div>
     </div>
   );

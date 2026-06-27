@@ -1,110 +1,108 @@
 import React from "react";
 import { FcGoogle } from "react-icons/fc";
+
 const login = () => {
   return (
-    <div className="px-12 py-24 flex mt-10">
-      <div className="flex w-full max-w-sm mx-auto overflow-hidden bg-white rounded-lg shadow-lg lg:max-w-4xl">
+    <div className="px-6 py-28 flex justify-center items-center bg-skin-cream/10 min-h-screen">
+      <div className="flex w-full max-w-sm mx-auto overflow-hidden bg-white rounded-2xl border border-skin-sand/35 shadow-sm lg:max-w-4xl">
         {/* Left-side image */}
         <div
           className="hidden bg-cover lg:block lg:w-1/2"
           style={{
             backgroundImage:
               "url('https://images.pexels.com/photos/3736397/pexels-photo-3736397.jpeg')",
+            backgroundPosition: "center",
           }}
         ></div>
 
         {/* Right-side form */}
-        <div className="w-full px-6 py-8 md:px-8 lg:w-1/2">
+        <div className="w-full px-6 py-10 md:px-10 lg:w-1/2 flex flex-col justify-center">
           {/* Logo */}
-          <div className="flex justify-center mx-auto">
-            <img
-              className="w-auto h-7 sm:h-8"
-              src="https://merakiui.com/images/logo.svg"
-              alt="Logo"
-            />
+          <div className="text-center mb-6">
+            <h2 className="text-3xl tracking-widest font-serif text-skin-charcoal">
+              SKINAURA
+            </h2>
+            <p className="mt-2 text-xs uppercase tracking-wider text-skin-charcoal/50">
+              Welcome back to your skin ritual
+            </p>
           </div>
 
-          <p className="mt-3 text-xl text-center text-gray-600">
-            Welcome back!
-          </p>
-
-          {/* Google Sign-in with React Icon */}
+          {/* Google Sign-in */}
           <a
             href="#"
-            className="flex items-center justify-center mt-4 text-gray-600 transition-colors duration-300 transform border rounded-lg hover:bg-gray-50"
+            className="flex items-center justify-center mt-4 border border-skin-sand rounded-xl hover:bg-skin-sand/20 transition-all duration-300"
           >
-            <div className="px-4 py-2">
-              <FcGoogle className="w-6 h-6" />
+            <div className="px-4 py-2 border-r border-skin-sand">
+              <FcGoogle className="w-5 h-5" />
             </div>
-            <span className="w-5/6 px-4 py-3 font-bold text-center">
+            <span className="w-5/6 text-xs uppercase tracking-widest font-bold text-skin-charcoal text-center">
               Sign in with Google
             </span>
           </a>
 
           {/* Divider */}
-          <div className="flex items-center justify-between mt-4">
-            <span className="w-1/5 border-b lg:w-1/4"></span>
-            <a
-              href="#"
-              className="text-xs text-center text-gray-500 uppercase hover:underline"
-            >
+          <div className="flex items-center justify-between mt-6">
+            <span className="w-1/4 border-b border-skin-sand/60"></span>
+            <span className="text-[10px] text-center text-skin-charcoal/40 uppercase tracking-widest">
               or login with email
-            </a>
-            <span className="w-1/5 border-b lg:w-1/4"></span>
+            </span>
+            <span className="w-1/4 border-b border-skin-sand/60"></span>
           </div>
 
           {/* Email Input */}
-          <div className="mt-4">
+          <div className="mt-6 space-y-1.5">
             <label
               htmlFor="LoggingEmailAddress"
-              className="block mb-2 text-sm font-medium text-gray-600"
+              className="text-[11px] uppercase tracking-wider font-bold text-skin-charcoal/60"
             >
               Email Address
             </label>
             <input
               id="LoggingEmailAddress"
               type="email"
-              className="block w-full px-4 py-2 text-gray-700 bg-white border rounded-lg focus:border-blue-400 focus:ring focus:ring-blue-300 focus:ring-opacity-40 focus:outline-none"
+              placeholder="name@example.com"
+              className="block w-full px-4 py-3 text-sm text-skin-charcoal bg-skin-cream/10 border border-skin-sand rounded-xl focus:border-skin-sage focus:ring-1 focus:ring-skin-sage focus:outline-none"
             />
           </div>
 
           {/* Password Input */}
-          <div className="mt-4">
-            <div className="flex justify-between">
+          <div className="mt-4 space-y-1.5">
+            <div className="flex justify-between items-center">
               <label
                 htmlFor="loggingPassword"
-                className="block mb-2 text-sm font-medium text-gray-600"
+                className="text-[11px] uppercase tracking-wider font-bold text-skin-charcoal/60"
               >
                 Password
               </label>
-              <a href="#" className="text-xs text-gray-500 hover:underline">
-                Forget Password?
+              <a href="#" className="text-[10px] uppercase tracking-wider text-skin-terracotta hover:underline">
+                Forgot?
               </a>
             </div>
             <input
               id="loggingPassword"
               type="password"
-              className="block w-full px-4 py-2 text-gray-700 bg-white border rounded-lg focus:border-blue-400 focus:ring focus:ring-blue-300 focus:ring-opacity-40 focus:outline-none"
+              placeholder="••••••••"
+              className="block w-full px-4 py-3 text-sm text-skin-charcoal bg-skin-cream/10 border border-skin-sand rounded-xl focus:border-skin-sage focus:ring-1 focus:ring-skin-sage focus:outline-none"
             />
           </div>
 
           {/* Sign-in Button */}
-          <div className="mt-6">
-            <button className="w-full px-6 py-3 text-sm font-medium tracking-wide text-white capitalize transition-colors duration-300 transform bg-gray-800 rounded-lg hover:bg-gray-700 focus:outline-none focus:ring focus:ring-gray-300 focus:ring-opacity-50">
+          <div className="mt-8">
+            <button className="w-full px-6 py-3.5 text-xs uppercase tracking-widest font-bold text-white bg-skin-charcoal rounded-xl hover:bg-skin-sage transition-all duration-300 shadow-md">
               Sign In
             </button>
           </div>
 
           {/* Sign-up Link */}
-          <div className="flex items-center justify-between mt-4">
-            <span className="w-1/5 border-b md:w-1/4"></span>
+          <div className="flex items-center justify-between mt-6">
+            <span className="w-1/5 border-b border-skin-sand/40"></span>
             <a
               href="#"
-              className="text-xs text-gray-500 uppercase hover:underline"
+              className="text-[10px] uppercase tracking-widest text-skin-charcoal/50 hover:text-skin-terracotta hover:underline"
             >
-              or sign up
+              or create account
             </a>
-            <span className="w-1/5 border-b md:w-1/4"></span>
+            <span className="w-1/5 border-b border-skin-sand/40"></span>
           </div>
         </div>
       </div>

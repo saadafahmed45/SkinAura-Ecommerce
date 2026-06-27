@@ -2,41 +2,37 @@ import React from "react";
 
 const CtaSection = () => {
   return (
-    <div>
-      <div
-        className="w-full text-white"
-        style={{
-          backgroundImage: "url('https://source.unsplash.com/random/640x480')",
-          backgroundPosition: "center",
-          backgroundSize: "cover",
-          backgroundBlendMode: "multiply",
-          backgroundColor: "rgba(0,0,0,0.5)",
-        }}
-      >
-        <div className="container flex flex-col content-center justify-center p-4 py-20 mx-auto">
-          <h1 className="text-4xl md:text-5xl font-bold text-center">
-            Get Our Updates
-          </h1>
-          <p className="pt-2 pb-6 text-lg md:text-xl text-center">
-            Find out about events and latest news
-          </p>
+    <section className="bg-skin-sand py-20 px-6 border-t border-skin-sand/40">
+      <div className="max-w-4xl mx-auto text-center space-y-6">
+        <span className="text-xs uppercase tracking-widest text-skin-terracotta font-bold">
+          Join the community
+        </span>
+        <h2 className="text-3xl md:text-5xl font-serif text-skin-charcoal leading-tight">
+          Unlock 10% Off Your First Ritual
+        </h2>
+        <p className="text-sm text-skin-charcoal/80 max-w-lg mx-auto font-light leading-relaxed">
+          Subscribe to the SkinAura Journal to receive expert skincare advice, product launches, and exclusive member-only offers.
+        </p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-            <input
-              type="text"
-              placeholder="example@email.com"
-              className="w-full sm:w-2/3 p-3 rounded-lg text-black"
-            />
-            <button
-              type="button"
-              className="w-full sm:w-1/3 p-3 font-semibold bg-white text-black rounded-lg hover:bg-gray-200 transition"
-            >
-              Subscribe
-            </button>
-          </div>
-        </div>
+        <form className="flex flex-col sm:flex-row items-center justify-center gap-3 max-w-md mx-auto pt-4">
+          <input
+            type="email"
+            required
+            placeholder="Enter your email address"
+            className="w-full sm:w-2/3 p-3 text-sm bg-white border border-skin-sand rounded-xl focus:border-skin-sage focus:outline-none focus:ring-1 focus:ring-skin-sage text-skin-charcoal placeholder-skin-charcoal/50"
+          />
+          <button
+            type="submit"
+            className="w-full sm:w-1/3 p-3 text-xs uppercase tracking-widest font-semibold bg-skin-charcoal text-white rounded-xl hover:bg-skin-sage transition-all duration-300 shadow-md"
+          >
+            Subscribe
+          </button>
+        </form>
+        <p className="text-[10px] text-skin-charcoal/50">
+          By signing up, you consent to our privacy policy and can unsubscribe at any time.
+        </p>
       </div>
-    </div>
+    </section>
   );
 };
 

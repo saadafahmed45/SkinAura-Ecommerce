@@ -1,12 +1,7 @@
 "use client";
 import React from "react";
 import Link from "next/link";
-import {
-  FaStar,
-  FaStarHalfAlt,
-  FaRegStar,
-  FaShoppingCart,
-} from "react-icons/fa";
+import { FaStar, FaStarHalfAlt, FaRegStar, FaShoppingCart } from "react-icons/fa";
 import { useCart } from "../context/CartContext";
 
 const ProductCard = ({ product }) => {
@@ -28,6 +23,7 @@ const ProductCard = ({ product }) => {
 
   const handleAddToCart = (e) => {
     e.preventDefault();
+    e.stopPropagation();
     handleAddedCart(product);
   };
 
@@ -36,109 +32,96 @@ const ProductCard = ({ product }) => {
     const fullStars = Math.floor(rating);
     const hasHalfStar = rating % 1 >= 0.5;
 
-    for (let i = 0; i < fullStars; i++) {
-      stars.push(
-        <FaStar key={`full-${i}`} className="text-yellow-400 w-4 h-4" />
-      );
-    }
-    if (hasHalfStar) {
-      stars.push(
-        <FaStarHalfAlt key="half" className="text-yellow-400 w-4 h-4" />
-      );
-    }
-    const emptyStars = 5 - Math.ceil(rating);
-    for (let i = 0; i < emptyStars; i++) {
-      stars.push(
-        <FaRegStar key={`empty-${i}`} className="text-yellow-400 w-4 h-4" />
-      );
+    for (let i = 0; i < 5; i++) {
+      if (i < fullStars) {
+        stars.push(<FaStar key={i} className="text-skin-gold w-3.5 h-3.5" />);
+      } else if (i === fullStars && hasHalfStar) {
+        stars.push(<FaStarHalfAlt key={i} className="text-skin-gold w-3.5 h-3.5" />);
+      } else {
+        stars.push(<FaRegStar key={i} className="text-skin-sand w-3.5 h-3.5" />);
+      }
     }
     return stars;
   };
 
-  return (
-    <div className="group relative bg-white rounded-2xl shadow-md hover:shadow-xl overflow-hidden transition-transform duration-300 transform hover:-translate-y-1">
-      {/* Discount / Stock Badge */}
-      <div className="absolute top-3 left-3 z-20 flex flex-col gap-1">
-        {discount > 0 && (
-          <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-lg">
-            -{discount}%
-          </span>
-        )}
-        {!inStock && (
-          <span className="bg-gray-800 text-white text-xs font-bold px-2 py-1 rounded-lg">
-            Out of Stock
-          </span>
-        )}
-      </div>
+  const finalPrice = discount > 0 ? discountPrice : price;
 
-      {/* Product Image */}
-      <Link href={`/product/${id}`}>
-        <div className="relative w-full h-72 overflow-hidden bg-gray-100">
-          <img
-            src={images[0]}
-            alt={name}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-          />
-          {/* Quick Add Button */}
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-30 opacity-0 group-hover:opacity-100 transition-all duration-300">
-            <button className="bg-white shadow-md px-4 py-2 text-sm font-medium rounded-lg flex items-center gap-2 hover:bg-gray-50">
-              <FaShoppingCart /> Quick Add
-            </button>
+  return (
+    <div className="group bg-white rounded-2xl border border-skin-sand/35 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between overflow-hidden">
+      <div>
+        {/* Badges */}
+        <div className="relative w-full h-64 overflow-hidden bg-skin-cream/40">
+          <div className="absolute top-3 left-3 z-10 flex flex-col gap-1.5">
+            {discount > 0 && (
+              <span className="bg-skin-terracotta text-white text-[10px] uppercase tracking-wider font-bold px-2.5 py-1 rounded-lg shadow-sm">
+                -{discount}%
+              </span>
+            )}
+            {!inStock && (
+              <span className="bg-skin-charcoal/80 text-white text-[10px] uppercase tracking-wider font-bold px-2.5 py-1 rounded-lg shadow-sm">
+                Out of Stock
+              </span>
+            )}
+          </div>
+
+          <Link href={`/product/${id}`} className="block w-full h-full">
+            <img
+              src={images[0]}
+              alt={name}
+              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+            />
+          </Link>
+        </div>
+
+        {/* Product Details */}
+        <div className="p-4 space-y-2">
+          {/* Brand */}
+          <p className="text-[10px] text-skin-charcoal/50 uppercase tracking-widest font-semibold">{brand}</p>
+
+          {/* Product Name */}
+          <Link href={`/product/${id}`} className="block">
+            <h3 className="text-md font-serif text-skin-charcoal hover:text-skin-terracotta transition-colors duration-200 line-clamp-2 min-h-[2.75rem] font-medium leading-snug">
+              {name}
+            </h3>
+          </Link>
+
+          {/* Rating */}
+          <div className="flex items-center gap-1.5 pt-0.5">
+            <div className="flex">{renderStars(rating)}</div>
+            <span className="text-[11px] text-skin-charcoal/60">
+              ({reviewCount})
+            </span>
+          </div>
+
+          {/* Price */}
+          <div className="flex items-baseline gap-2 pt-1">
+            <span className="text-md font-bold text-skin-terracotta">
+              ${finalPrice.toFixed(2)}
+            </span>
+            {discount > 0 && (
+              <span className="text-xs text-skin-charcoal/40 line-through">
+                ${price.toFixed(2)}
+              </span>
+            )}
           </div>
         </div>
-      </Link>
-
-      {/* Product Info */}
-      <div className="p-4">
-        {/* Brand */}
-        <p className="text-xs text-gray-500 uppercase tracking-wide">{brand}</p>
-
-        {/* Product Name */}
-        <h3 className="text-lg font-semibold mt-1 text-gray-800 line-clamp-2 min-h-[3.5rem]">
-          {name}
-        </h3>
-
-        {/* Rating */}
-        <div className="flex items-center gap-2 mt-2">
-          <div className="flex">{renderStars(rating)}</div>
-          <span className="text-sm text-gray-600">
-            {rating} ({reviewCount})
-          </span>
-        </div>
-
-        {/* Price */}
-        <div className="mt-3 flex items-center gap-3">
-          <p className="text-blue-600 font-bold text-xl">
-            ${discount > 0 ? discountPrice.toFixed(2) : price.toFixed(2)}
-          </p>
-          {discount > 0 && (
-            <p className="text-gray-400 line-through text-sm">
-              ${price.toFixed(2)}
-            </p>
-          )}
-        </div>
-
-        {/* Low Stock Alert */}
-        {inStock && stock < 20 && (
-          <p className="text-orange-500 text-xs mt-2">
-            Only {stock} left — hurry!
-          </p>
-        )}
       </div>
 
-      {/* Floating Add to Cart */}
-      <button
-        onClick={handleAddToCart}
-        disabled={!inStock}
-        className={`absolute bottom-4 right-4 z-20 opacity-0 group-hover:opacity-100 transition duration-300 px-3 py-2 rounded-lg text-sm font-bold shadow-md flex items-center gap-2 ${
-          inStock
-            ? "bg-blue-600 text-white hover:bg-blue-500"
-            : "bg-gray-300 text-gray-600 cursor-not-allowed"
-        }`}
-      >
-        <FaShoppingCart className="text-sm" />
-        {inStock ? "Add to Cart" : "Unavailable"}
-      </button>
+      {/* Action Footer */}
+      <div className="p-4 pt-0">
+        <button
+          onClick={handleAddToCart}
+          disabled={!inStock}
+          className={`w-full py-2.5 rounded-xl text-xs uppercase tracking-widest font-bold shadow-sm transition-all duration-300 flex items-center justify-center gap-2 ${
+            inStock
+              ? "bg-skin-charcoal text-white hover:bg-skin-sage active:scale-[0.98]"
+              : "bg-skin-sand text-skin-charcoal/40 cursor-not-allowed"
+          }`}
+        >
+          <FaShoppingCart className="text-xs" />
+          {inStock ? "Add to Cart" : "Unavailable"}
+        </button>
+      </div>
     </div>
   );
 };
