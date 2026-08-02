@@ -149,7 +149,7 @@ export default function Checkout() {
                     </span>
                     <span className="text-skin-charcoal font-medium truncate max-w-[150px]">{item.name}</span>
                   </div>
-                  <span className="font-semibold text-skin-charcoal">${(item.price * item.quantity).toFixed(2)}</span>
+                  <span className="font-semibold text-skin-charcoal">${(Number(item.price || 0) * Number(item.quantity || 1)).toFixed(2)}</span>
                 </div>
               ))}
             </div>
@@ -159,17 +159,17 @@ export default function Checkout() {
             <div className="space-y-3 text-xs uppercase tracking-wider text-skin-charcoal/60">
               <div className="flex justify-between">
                 <span>Subtotal</span>
-                <span className="font-semibold text-skin-charcoal">${subtotal.toFixed(2)}</span>
+                <span className="font-semibold text-skin-charcoal">${Number(subtotal || 0).toFixed(2)}</span>
               </div>
 
               <div className="flex justify-between">
                 <span>Delivery</span>
-                <span className="font-semibold text-skin-charcoal">${deliveryFee.toFixed(2)}</span>
+                <span className="font-semibold text-skin-charcoal">${Number(deliveryFee || 0).toFixed(2)}</span>
               </div>
 
               <div className="flex justify-between text-sm uppercase tracking-wider font-bold border-t border-skin-sand/20 pt-4 text-skin-charcoal">
                 <span>Total</span>
-                <span className="text-md text-skin-terracotta font-bold">${total.toFixed(2)}</span>
+                <span className="text-md text-skin-terracotta font-bold">${Number(total || 0).toFixed(2)}</span>
               </div>
             </div>
           </div>

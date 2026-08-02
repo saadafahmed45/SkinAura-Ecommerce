@@ -21,7 +21,12 @@ export const CartProvider = ({ children }) => {
 
     if (storedCart) {
       try {
-        setCartItems(JSON.parse(storedCart));
+        const parsed = JSON.parse(storedCart);
+        // Filter out any corrupt items where price is not a valid number
+        const clean = parsed.filter(
+          (item) => item && typeof item.id !== "undefined" && !isNaN(Number(item.price))
+        );
+        setCartItems(clean);
       } catch {
         setCartItems([]);
       }

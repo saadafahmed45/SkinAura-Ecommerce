@@ -99,7 +99,7 @@ export default function MyOrders() {
                             </p>
                           </div>
                         </div>
-                        <p className="text-xs font-bold text-skin-charcoal">${(item.price * item.quantity).toFixed(2)}</p>
+                        <p className="text-xs font-bold text-skin-charcoal">${(Number(item.price || 0) * Number(item.quantity || 1)).toFixed(2)}</p>
                       </div>
                     ))}
                   </div>
@@ -109,17 +109,17 @@ export default function MyOrders() {
                 <div className="border-t border-skin-sand/20 pt-4 space-y-2.5 max-w-xs ml-auto text-xs uppercase tracking-wider text-skin-charcoal/60">
                   <div className="flex justify-between">
                     <span>Subtotal</span>
-                    <span className="font-semibold text-skin-charcoal">${order.subtotal.toFixed(2)}</span>
+                    <span className="font-semibold text-skin-charcoal">${Number(order.subtotal || 0).toFixed(2)}</span>
                   </div>
 
                   <div className="flex justify-between">
                     <span>Delivery</span>
-                    <span className="font-semibold text-skin-charcoal">${order.deliveryFee.toFixed(2)}</span>
+                    <span className="font-semibold text-skin-charcoal">${Number(order.deliveryFee || 0).toFixed(2)}</span>
                   </div>
 
                   <div className="flex justify-between text-sm uppercase tracking-wider font-bold border-t border-skin-sand/20 pt-3 text-skin-charcoal">
                     <span>Total Paid</span>
-                    <span className="text-md text-skin-terracotta font-bold">${order.total.toFixed(2)}</span>
+                    <span className="text-md text-skin-terracotta font-bold">${Number(order.total || 0).toFixed(2)}</span>
                   </div>
                 </div>
               </div>

@@ -113,12 +113,12 @@ const ProductDetails = ({ params }) => {
           {/* Price */}
           <div className="flex items-center gap-4">
             <h2 className="text-3xl font-bold text-skin-terracotta">
-              ${(product.discountPrice ? product.discountPrice : product.price).toFixed(2)}
+              ${Number(product.discountPrice ? product.discountPrice : product.price || 0).toFixed(2)}
             </h2>
             {product.discount > 0 && (
               <>
                 <p className="text-skin-charcoal/40 line-through text-lg">
-                  ${product.price.toFixed(2)}
+                  ${Number(product.price || 0).toFixed(2)}
                 </p>
                 <span className="px-2.5 py-1 bg-skin-terracotta text-white text-[10px] tracking-wider uppercase font-bold rounded-lg shadow-sm">
                   Save {product.discount}%

@@ -53,7 +53,7 @@ export default function Cart() {
                     <div className="space-y-1">
                       <h3 className="text-sm sm:text-md font-medium text-skin-charcoal">{item.name}</h3>
                       <p className="text-skin-terracotta text-xs font-bold">
-                        ${item.price.toFixed(2)}
+                        ${Number(item.price || 0).toFixed(2)}
                       </p>
 
                       {/* Quantity Controls */}
@@ -78,7 +78,7 @@ export default function Cart() {
                   {/* Right */}
                   <div className="flex sm:flex-col items-end justify-between w-full sm:w-auto gap-4 border-t sm:border-t-0 pt-4 sm:pt-0">
                     <p className="font-semibold text-sm text-skin-charcoal">
-                      Total: ${(item.price * item.quantity).toFixed(2)}
+                      Total: ${(Number(item.price || 0) * Number(item.quantity || 1)).toFixed(2)}
                     </p>
 
                     <div className="flex gap-4">
@@ -101,17 +101,17 @@ export default function Cart() {
             <div className="mt-10 border-t border-skin-sand/40 pt-8 space-y-4 max-w-md ml-auto">
               <div className="flex justify-between text-xs uppercase tracking-wider text-skin-charcoal/60">
                 <span>Subtotal</span>
-                <span className="font-semibold text-skin-charcoal">${subtotal.toFixed(2)}</span>
+                <span className="font-semibold text-skin-charcoal">${Number(subtotal || 0).toFixed(2)}</span>
               </div>
 
               <div className="flex justify-between text-xs uppercase tracking-wider text-skin-charcoal/60">
                 <span>Shipping Fee</span>
-                <span className="font-semibold text-skin-charcoal">${deliveryFee.toFixed(2)}</span>
+                <span className="font-semibold text-skin-charcoal">${Number(deliveryFee || 0).toFixed(2)}</span>
               </div>
 
               <div className="flex justify-between text-md uppercase tracking-wider font-bold border-t border-skin-sand/20 pt-4 text-skin-charcoal">
                 <span>Total</span>
-                <span className="text-lg text-skin-terracotta">${total.toFixed(2)}</span>
+                <span className="text-lg text-skin-terracotta">${Number(total || 0).toFixed(2)}</span>
               </div>
 
               <div className="flex justify-between items-center gap-4 pt-6">
