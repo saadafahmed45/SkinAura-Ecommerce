@@ -215,7 +215,7 @@ export const skincareProducts = [
   {
     id: 8,
     name: "Bioderma Atoderm Intensive Gel Moussant",
-    category: "Facewash",
+    category: "Gel Wash",
     subcategory: "Sensitive Skin",
     brand: "Bioderma",
     price: 15.99,
@@ -452,7 +452,7 @@ export const skincareProducts = [
   {
     id: 16,
     name: "L’Oreal Paris Revitalift Night Cream",
-    category: "Night Cream",
+    category: "Cream",
     subcategory: "Anti-aging",
     brand: "L’Oreal Paris",
     price: 25.99,

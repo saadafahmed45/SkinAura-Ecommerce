@@ -12,8 +12,10 @@ export default function Home() {
       <HeroBanner />
       <OfferMarquee />
       <Category />
+      <FeatureProducts categoryId={1} categoryName="Facewash" />
       <FeatureProducts categoryId={1} categoryName="Serum" />
       <FeatureProducts categoryId={2} categoryName="Cream" />
+      <FeatureProducts categoryId={3} categoryName="Sunscreen" />
       <About />
       <CtaSection />
     </main>

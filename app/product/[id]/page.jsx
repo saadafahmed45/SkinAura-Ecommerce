@@ -18,14 +18,19 @@ const ProductDetails = ({ params }) => {
   };
 
   const [selectedImage, setSelectedImage] = useState(
-    product?.images?.[0] || ""
+    product?.images?.[0] || "",
   );
 
   if (!product) {
     return (
       <div className="h-screen flex flex-col items-center justify-center bg-skin-cream">
-        <p className="text-skin-terracotta text-lg font-serif mb-4">Product not found!</p>
-        <Link href="/product" className="px-6 py-2.5 text-xs font-bold uppercase tracking-widest bg-skin-charcoal text-white rounded-xl">
+        <p className="text-skin-terracotta text-lg font-serif mb-4">
+          Product not found!
+        </p>
+        <Link
+          href="/product"
+          className="px-6 py-2.5 text-xs font-bold uppercase tracking-widest bg-skin-charcoal text-white rounded-xl"
+        >
           Back to Shop
         </Link>
       </div>
@@ -42,7 +47,10 @@ const ProductDetails = ({ params }) => {
       <nav className="text-[11px] text-skin-charcoal/50 uppercase tracking-widest mb-10">
         <ul className="flex items-center space-x-2.5">
           <li>
-            <Link href="/" className="hover:text-skin-terracotta transition-colors duration-200">
+            <Link
+              href="/"
+              className="hover:text-skin-terracotta transition-colors duration-200"
+            >
               Home
             </Link>
           </li>
@@ -113,7 +121,12 @@ const ProductDetails = ({ params }) => {
           {/* Price */}
           <div className="flex items-center gap-4">
             <h2 className="text-3xl font-bold text-skin-terracotta">
-              ${Number(product.discountPrice ? product.discountPrice : product.price || 0).toFixed(2)}
+              $
+              {Number(
+                product.discountPrice
+                  ? product.discountPrice
+                  : product.price || 0,
+              ).toFixed(2)}
             </h2>
             {product.discount > 0 && (
               <>
@@ -129,7 +142,9 @@ const ProductDetails = ({ params }) => {
 
           {/* Stock Info */}
           <div className="flex items-center gap-2">
-            <span className={`w-2.5 h-2.5 rounded-full ${product.inStock ? "bg-green-500" : "bg-red-500"}`}></span>
+            <span
+              className={`w-2.5 h-2.5 rounded-full ${product.inStock ? "bg-green-500" : "bg-red-500"}`}
+            ></span>
             <p className="text-xs uppercase tracking-wider font-semibold text-skin-charcoal/70">
               {product.inStock
                 ? `In Stock (${product.stock} products available)`
@@ -147,10 +162,15 @@ const ProductDetails = ({ params }) => {
           {/* Ingredients */}
           {product.ingredients && (
             <div className="space-y-2">
-              <h3 className="text-xs uppercase tracking-widest font-bold text-skin-charcoal">Actives & Ingredients</h3>
+              <h3 className="text-xs uppercase tracking-widest font-bold text-skin-charcoal">
+                Actives & Ingredients
+              </h3>
               <div className="flex flex-wrap gap-2 pt-1">
                 {product.ingredients.map((ing, i) => (
-                  <span key={i} className="bg-skin-sand/65 text-skin-charcoal px-3 py-1.5 text-xs rounded-xl border border-skin-sand/40">
+                  <span
+                    key={i}
+                    className="bg-skin-sand/65 text-skin-charcoal px-3 py-1.5 text-xs rounded-xl border border-skin-sand/40"
+                  >
                     {ing}
                   </span>
                 ))}
@@ -161,8 +181,12 @@ const ProductDetails = ({ params }) => {
           {/* Skin Type */}
           {product.skinType && (
             <div className="space-y-1">
-              <h3 className="text-xs uppercase tracking-widest font-bold text-skin-charcoal">Recommended Skin Type</h3>
-              <p className="text-sm text-skin-charcoal/80 font-light font-sans">{product.skinType.join(", ")}</p>
+              <h3 className="text-xs uppercase tracking-widest font-bold text-skin-charcoal">
+                Recommended Skin Type
+              </h3>
+              <p className="text-sm text-skin-charcoal/80 font-light font-sans">
+                {product.skinType.join(", ")}
+              </p>
             </div>
           )}
 
@@ -195,7 +219,7 @@ const ProductDetails = ({ params }) => {
             >
               {product.inStock ? "Add to Cart" : "Unavailable"}
             </button>
-            <button 
+            <button
               disabled={!product.inStock}
               onClick={handleAddToCart}
               className={`flex-1 px-8 py-3.5 rounded-xl text-xs uppercase tracking-widest font-bold border transition-all duration-300 ${
@@ -217,7 +241,7 @@ const ProductDetails = ({ params }) => {
             Complete Your Ritual
           </h2>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-6">
             {relatedProducts.map((product) => (
               <ProductCard product={product} key={product.id} />
             ))}

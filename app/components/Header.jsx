@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { FiMenu, FiX, FiShoppingCart, FiSearch } from "react-icons/fi";
+import { FiMenu, FiX, FiShoppingCart, FiSearch, FiUser } from "react-icons/fi";
 import { HiSparkles } from "react-icons/hi2";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -19,7 +19,6 @@ const Header = () => {
     { name: "Products", href: "/product" },
     { name: "About", href: "/about" },
     { name: "Contact", href: "/contact" },
-    { name: "Login", href: "/login" },
   ];
 
   useEffect(() => {
@@ -33,7 +32,9 @@ const Header = () => {
   useEffect(() => {
     if (isOpen) document.body.style.overflow = "hidden";
     else document.body.style.overflow = "";
-    return () => { document.body.style.overflow = ""; };
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, [isOpen]);
 
   const isHomeTransparent = pathname === "/" && !isScrolled;
@@ -48,12 +49,15 @@ const Header = () => {
         }`}
       >
         <div className="max-w-7xl mx-auto px-5 md:px-10 py-0 flex items-center justify-between h-[70px]">
-          
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 group">
-            <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-300 ${
-              isHomeTransparent ? "bg-white/20 backdrop-blur-sm" : "bg-skin-terracotta/10"
-            }`}>
+            <div
+              className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-300 ${
+                isHomeTransparent
+                  ? "bg-white/20 backdrop-blur-sm"
+                  : "bg-skin-terracotta/10"
+              }`}
+            >
               <HiSparkles
                 size={16}
                 className={`transition-colors duration-300 ${
@@ -66,7 +70,7 @@ const Header = () => {
                 isHomeTransparent ? "text-white" : "text-skin-charcoal"
               }`}
             >
-              SKINAURA
+              SKIN-AURA
             </span>
           </Link>
 
@@ -84,8 +88,8 @@ const Header = () => {
                         ? "text-skin-sand"
                         : "text-skin-terracotta"
                       : isHomeTransparent
-                      ? "text-white/80 hover:text-white"
-                      : "text-skin-charcoal/70 hover:text-skin-charcoal"
+                        ? "text-white/80 hover:text-white"
+                        : "text-skin-charcoal/70 hover:text-skin-charcoal"
                   }`}
                 >
                   {link.name}
@@ -94,8 +98,8 @@ const Header = () => {
                       isActive
                         ? "w-full bg-skin-terracotta"
                         : isHomeTransparent
-                        ? "w-0 group-hover:w-full bg-white"
-                        : "w-0 group-hover:w-full bg-skin-terracotta"
+                          ? "w-0 group-hover:w-full bg-white"
+                          : "w-0 group-hover:w-full bg-skin-terracotta"
                     }`}
                   />
                 </Link>
@@ -117,6 +121,18 @@ const Header = () => {
               <FiSearch size={16} />
             </button>
 
+            {/* Login */}
+            <Link
+              href="/login"
+              className={`relative w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-300 hover:scale-105 ${
+                isHomeTransparent
+                  ? "bg-white/15 hover:bg-white/25 text-white"
+                  : "bg-skin-sand/60 hover:bg-skin-sand text-skin-charcoal"
+              }`}
+            >
+              <FiUser size={16} />
+            </Link>
+
             {/* Cart */}
             <Link
               href="/cart"
@@ -137,6 +153,16 @@ const Header = () => {
 
           {/* Mobile Right */}
           <div className="lg:hidden flex items-center gap-2">
+            <Link
+              href="/login"
+              className={`relative w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-300 ${
+                isHomeTransparent
+                  ? "bg-white/15 text-white"
+                  : "bg-skin-sand/60 text-skin-charcoal"
+              }`}
+            >
+              <FiUser size={16} />
+            </Link>
             <Link
               href="/cart"
               className={`relative w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-300 ${
@@ -217,7 +243,9 @@ const Header = () => {
             >
               {/* Mobile Header */}
               <div className="flex items-center justify-between px-6 py-5 border-b border-skin-sand/40">
-                <span className="text-lg font-serif text-skin-charcoal tracking-widest">SKINAURA</span>
+                <span className="text-lg font-serif text-skin-charcoal tracking-widest">
+                  SKINAURA
+                </span>
                 <button
                   onClick={() => setIsOpen(false)}
                   className="w-8 h-8 flex items-center justify-center rounded-lg bg-skin-sand/60"

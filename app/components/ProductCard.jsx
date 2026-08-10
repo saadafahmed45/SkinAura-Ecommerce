@@ -1,7 +1,12 @@
 "use client";
 import React from "react";
 import Link from "next/link";
-import { FaStar, FaStarHalfAlt, FaRegStar, FaShoppingCart } from "react-icons/fa";
+import {
+  FaStar,
+  FaStarHalfAlt,
+  FaRegStar,
+  FaShoppingCart,
+} from "react-icons/fa";
 import { useCart } from "../context/CartContext";
 
 const ProductCard = ({ product }) => {
@@ -36,9 +41,13 @@ const ProductCard = ({ product }) => {
       if (i < fullStars) {
         stars.push(<FaStar key={i} className="text-skin-gold w-3.5 h-3.5" />);
       } else if (i === fullStars && hasHalfStar) {
-        stars.push(<FaStarHalfAlt key={i} className="text-skin-gold w-3.5 h-3.5" />);
+        stars.push(
+          <FaStarHalfAlt key={i} className="text-skin-gold w-3.5 h-3.5" />,
+        );
       } else {
-        stars.push(<FaRegStar key={i} className="text-skin-sand w-3.5 h-3.5" />);
+        stars.push(
+          <FaRegStar key={i} className="text-skin-sand w-3.5 h-3.5" />,
+        );
       }
     }
     return stars;
@@ -76,7 +85,9 @@ const ProductCard = ({ product }) => {
         {/* Product Details */}
         <div className="p-4 space-y-2">
           {/* Brand */}
-          <p className="text-[10px] text-skin-charcoal/50 uppercase tracking-widest font-semibold">{brand}</p>
+          <p className="text-[10px] text-skin-charcoal/50 uppercase tracking-widest font-semibold">
+            {brand}
+          </p>
 
           {/* Product Name */}
           <Link href={`/product/${id}`} className="block">
@@ -86,15 +97,15 @@ const ProductCard = ({ product }) => {
           </Link>
 
           {/* Rating */}
-          <div className="flex items-center gap-1.5 pt-0.5">
+          {/* <div className="flex items-center gap-1.5 pt-0.5">
             <div className="flex">{renderStars(rating)}</div>
             <span className="text-[11px] text-skin-charcoal/60">
               ({reviewCount})
             </span>
-          </div>
+          </div> */}
 
           {/* Price */}
-          <div className="flex items-baseline gap-2 pt-1">
+          <div className="flex items-baseline gap-2">
             <span className="text-md font-bold text-skin-terracotta">
               ${Number(finalPrice || 0).toFixed(2)}
             </span>
