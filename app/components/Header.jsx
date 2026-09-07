@@ -1,18 +1,23 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { FiMenu, FiX, FiShoppingCart, FiSearch, FiUser } from "react-icons/fi";
+import { FiMenu, FiX, FiShoppingCart, FiSearch, FiUser, FiLogOut, FiPackage, FiShield } from "react-icons/fi";
 import { HiSparkles } from "react-icons/hi2";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useCart } from "../context/CartContext";
+import { useAuth } from "../context/AuthContext";
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+  const userMenuRef = useRef(null);
   const pathname = usePathname();
+  const router = useRouter();
   const { cartItems } = useCart();
+  const { user, logout, isAdmin } = useAuth();
 
   const navLinks = [
     { name: "Home", href: "/" },
@@ -27,6 +32,16 @@ const Header = () => {
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
+        setUserDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   useEffect(() => {
@@ -121,17 +136,94 @@ const Header = () => {
               <FiSearch size={16} />
             </button>
 
-            {/* Login */}
-            <Link
-              href="/login"
-              className={`relative w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-300 hover:scale-105 ${
-                isHomeTransparent
-                  ? "bg-white/15 hover:bg-white/25 text-white"
-                  : "bg-skin-sand/60 hover:bg-skin-sand text-skin-charcoal"
-              }`}
-            >
-              <FiUser size={16} />
-            </Link>
+            {/* User Account / Dropdown */}
+            <div className="relative" ref={userMenuRef}>
+              {user ? (
+                <button
+                  onClick={() => setUserDropdownOpen(!userDropdownOpen)}
+                  className={`relative flex items-center gap-2 h-9 px-3 rounded-xl transition-all duration-300 hover:scale-102 border ${
+                    isHomeTransparent
+                      ? "bg-white/15 hover:bg-white/25 border-white/20 text-white"
+                      : "bg-skin-sand/60 hover:bg-skin-sand border-skin-sand/60 text-skin-charcoal"
+                  }`}
+                >
+                  <span className="w-5 h-5 rounded-full bg-skin-terracotta text-white text-[10px] font-bold flex items-center justify-center uppercase">
+                    {user.name?.[0] || "U"}
+                  </span>
+                  <span className="text-xs font-semibold max-w-[90px] truncate">
+                    {user.name?.split(" ")[0]}
+                  </span>
+                </button>
+              ) : (
+                <Link
+                  href="/login"
+                  className={`relative w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-300 hover:scale-105 ${
+                    isHomeTransparent
+                      ? "bg-white/15 hover:bg-white/25 text-white"
+                      : "bg-skin-sand/60 hover:bg-skin-sand text-skin-charcoal"
+                  }`}
+                >
+                  <FiUser size={16} />
+                </Link>
+              )}
+
+              {/* User Dropdown Menu */}
+              <AnimatePresence>
+                {user && userDropdownOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 8, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 8, scale: 0.95 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-skin-sand/40 py-2 z-50 overflow-hidden"
+                  >
+                    <div className="px-4 py-2.5 border-b border-skin-sand/30 bg-skin-cream/20">
+                      <p className="text-xs font-bold text-skin-charcoal truncate">{user.name}</p>
+                      <p className="text-[10px] text-skin-charcoal/60 truncate">{user.email}</p>
+                      {isAdmin && (
+                        <span className="mt-1 inline-block bg-skin-terracotta/10 text-skin-terracotta text-[9px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-md">
+                          Administrator
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="py-1">
+                      <Link
+                        href="/my-orders"
+                        onClick={() => setUserDropdownOpen(false)}
+                        className="flex items-center gap-2.5 px-4 py-2 text-xs text-skin-charcoal hover:bg-skin-sand/30 transition-colors"
+                      >
+                        <FiPackage size={14} className="text-skin-terracotta" />
+                        My Orders
+                      </Link>
+
+                      {isAdmin && (
+                        <Link
+                          href="/admin"
+                          onClick={() => setUserDropdownOpen(false)}
+                          className="flex items-center gap-2.5 px-4 py-2 text-xs text-skin-charcoal hover:bg-skin-sand/30 transition-colors font-semibold"
+                        >
+                          <FiShield size={14} className="text-skin-sage" />
+                          Admin Dashboard
+                        </Link>
+                      )}
+
+                      <button
+                        onClick={() => {
+                          setUserDropdownOpen(false);
+                          logout();
+                          router.push("/");
+                        }}
+                        className="w-full flex items-center gap-2.5 px-4 py-2 text-xs text-red-500 hover:bg-red-50 transition-colors text-left"
+                      >
+                        <FiLogOut size={14} />
+                        Sign Out
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
 
             {/* Cart */}
             <Link
@@ -284,8 +376,59 @@ const Header = () => {
                 })}
               </div>
 
-              {/* Mobile Footer */}
-              <div className="px-6 pb-8">
+              {/* Mobile User & Footer */}
+              <div className="px-6 pb-8 space-y-3">
+                {user ? (
+                  <div className="bg-skin-sand/30 rounded-xl p-3 border border-skin-sand/40 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <span className="w-6 h-6 rounded-full bg-skin-terracotta text-white text-xs font-bold flex items-center justify-center uppercase">
+                        {user.name?.[0]}
+                      </span>
+                      <div className="truncate">
+                        <p className="text-xs font-bold text-skin-charcoal">{user.name}</p>
+                        <p className="text-[10px] text-skin-charcoal/50">{user.email}</p>
+                      </div>
+                    </div>
+                    <div className="pt-2 border-t border-skin-sand/30 flex flex-col gap-1 text-xs font-medium">
+                      <Link
+                        href="/my-orders"
+                        onClick={() => setIsOpen(false)}
+                        className="py-1 text-skin-charcoal flex items-center gap-2 hover:text-skin-terracotta"
+                      >
+                        <FiPackage size={13} className="text-skin-terracotta" />
+                        My Orders
+                      </Link>
+                      {isAdmin && (
+                        <Link
+                          href="/admin"
+                          onClick={() => setIsOpen(false)}
+                          className="py-1 text-skin-charcoal flex items-center gap-2 font-semibold hover:text-skin-sage"
+                        >
+                          <FiShield size={13} className="text-skin-sage" />
+                          Admin Dashboard
+                        </Link>
+                      )}
+                      <button
+                        onClick={() => {
+                          setIsOpen(false);
+                          logout();
+                          router.push("/");
+                        }}
+                        className="py-1 text-red-500 text-left flex items-center gap-2"
+                      >
+                        <FiLogOut size={13} />
+                        Sign Out
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <Link href="/login" onClick={() => setIsOpen(false)}>
+                    <button className="w-full py-3 mb-2 rounded-xl border border-skin-charcoal text-skin-charcoal text-xs tracking-widest uppercase font-bold hover:bg-skin-sand/30">
+                      Sign In / Register
+                    </button>
+                  </Link>
+                )}
+
                 <Link href="/product" onClick={() => setIsOpen(false)}>
                   <button className="w-full py-3.5 rounded-xl bg-skin-charcoal text-white text-xs tracking-widest uppercase font-bold shadow-md">
                     Shop Now

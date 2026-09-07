@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { createContext, useContext, useEffect, useState } from "react";
 import Swal from "sweetalert2";
+import api from "../lib/api";
 
 const CartContext = createContext();
 
@@ -127,6 +128,9 @@ export const CartProvider = ({ children }) => {
     updateLocalStorage(updated);
   };
 
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [discount, setDiscount] = useState(0);
+
   /* -----------------------------------
     Totals
   -------------------------------------*/
@@ -136,40 +140,79 @@ export const CartProvider = ({ children }) => {
   );
 
   const deliveryFee = cartItems.length > 0 ? 5 : 0;
-  const total = subtotal + deliveryFee;
+  const total = Math.max(0, subtotal - discount + deliveryFee);
 
   /* -----------------------------------
-    PLACE ORDER SYSTEM (NEW)
+    APPLY COUPON
   -------------------------------------*/
-  const placeOrder = (customerInfo) => {
+  const applyPromoCode = async (code) => {
+    try {
+      const res = await api.post("/coupons/apply", { code, subtotal });
+      if (res.data?.success) {
+        setAppliedCoupon(res.data.coupon);
+        setDiscount(res.data.discount);
+        Swal.fire("Promo Applied!", res.data.message, "success");
+        return true;
+      }
+    } catch (err) {
+      Swal.fire("Coupon Error", err.customMessage || "Invalid coupon code.", "error");
+      return false;
+    }
+  };
+
+  /* -----------------------------------
+    PLACE ORDER SYSTEM
+  -------------------------------------*/
+  const placeOrder = async (customerInfo) => {
     if (cartItems.length === 0) {
       Swal.fire("Error", "Your cart is empty!", "error");
       return;
     }
 
-    // Create order object
-    const newOrder = {
-      id: Date.now(),
-      customer: customerInfo, // name, email, phone, address, etc.
-      items: cartItems,
-      subtotal,
-      deliveryFee,
-      total,
-      date: new Date().toISOString(),
-    };
+    try {
+      Swal.fire({
+        title: "Processing Order...",
+        text: "Securing your skincare ritual",
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading(),
+      });
 
-    const updatedOrders = [...orders, newOrder];
-    saveOrders(updatedOrders);
+      const res = await api.post("/orders", {
+        customer: customerInfo,
+        items: cartItems.map((item) => ({
+          id: item.id,
+          _id: item._id,
+          name: item.name,
+          quantity: item.quantity,
+          price: item.price,
+        })),
+        couponCode: appliedCoupon?.code || "",
+      });
 
-    // Clear cart
-    updateLocalStorage([]);
+      if (res.data?.success) {
+        const newOrder = res.data.order;
+        const updatedOrders = [newOrder, ...orders];
+        saveOrders(updatedOrders);
 
-    Swal.fire({
-      title: "Order Placed Successfully!",
-      text: "Thank you for your purchase 🎉",
-      icon: "success",
-      confirmButtonText: "View Order",
-    }).then(() => router.push(`/my-orders`));
+        // Clear cart
+        updateLocalStorage([]);
+        setAppliedCoupon(null);
+        setDiscount(0);
+
+        Swal.fire({
+          title: "Order Placed Successfully!",
+          text: `Order #${newOrder.orderNumber || newOrder.id} has been confirmed. Thank you for your purchase 🎉`,
+          icon: "success",
+          confirmButtonText: "View Order",
+        }).then(() => router.push(`/my-orders`));
+      }
+    } catch (err) {
+      Swal.fire({
+        title: "Checkout Error",
+        text: err.customMessage || "Could not process order. Please try again.",
+        icon: "error",
+      });
+    }
   };
 
   return (
@@ -182,9 +225,12 @@ export const CartProvider = ({ children }) => {
         removeFromCart,
         subtotal,
         deliveryFee,
+        discount,
         total,
         orders,
-        placeOrder, // NEW — export order function
+        placeOrder,
+        applyPromoCode,
+        appliedCoupon,
       }}
     >
       {children}

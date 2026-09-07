@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { skincareProducts } from "../api/skinData";
 import ProductCard from "../components/ProductCard";
+import api from "../lib/api";
 import {
   FiSliders,
   FiX,
@@ -16,13 +16,20 @@ import {
 import { HiOutlineSparkles } from "react-icons/hi2";
 
 const RATINGS = [4, 3, 2];
+const PRICE_MAX = 10000;
 
 const ProductsPage = () => {
+  const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState(["all"]);
+  const [loading, setLoading] = useState(true);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [sortOption, setSortOption] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [minPrice, setMinPrice] = useState(0);
-  const [maxPrice, setMaxPrice] = useState(10000);
+  const [maxPrice, setMaxPrice] = useState(PRICE_MAX);
   const [selectedRating, setSelectedRating] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
@@ -30,57 +37,50 @@ const ProductsPage = () => {
 
   const productsPerPage = 8;
 
-  const categories = useMemo(
-    () => ["all", ...new Set(skincareProducts.map((p) => p.category))],
-    []
-  );
+  // Fetch categories once
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await api.get("/categories");
+        const cats = res.data?.categories || res.data?.data || [];
+        const names = cats.map((c) => c.name).filter(Boolean);
+        setCategories(["all", ...names]);
+      } catch {
+        // fallback - leave as ["all"]
+      }
+    };
+    fetchCategories();
+  }, []);
 
-  const priceMax = useMemo(
-    () => Math.max(...skincareProducts.map((p) => p.price)),
-    []
-  );
+  // Fetch products with filters
+  const fetchProducts = useCallback(async () => {
+    setLoading(true);
+    try {
+      const params = new URLSearchParams();
+      if (selectedCategory && selectedCategory !== "all") params.set("category", selectedCategory);
+      if (sortOption) params.set("sort", sortOption);
+      if (minPrice > 0) params.set("minPrice", minPrice);
+      if (maxPrice < PRICE_MAX) params.set("maxPrice", maxPrice);
+      if (selectedRating > 0) params.set("rating", selectedRating);
+      if (searchQuery.trim()) params.set("search", searchQuery.trim());
+      params.set("page", currentPage);
+      params.set("limit", productsPerPage);
 
-  // Filter
-  let filteredProducts = useMemo(() => {
-    let result =
-      selectedCategory === "all"
-        ? skincareProducts
-        : skincareProducts.filter((p) => p.category === selectedCategory);
-
-    // search
-    if (searchQuery.trim()) {
-      result = result.filter((p) =>
-        p.name.toLowerCase().includes(searchQuery.toLowerCase())
-      );
+      const res = await api.get(`/products?${params.toString()}`);
+      const data = res.data;
+      setProducts(data.products || data.data || []);
+      setTotal(data.total || 0);
+      setTotalPages(data.totalPages || 1);
+    } catch {
+      setProducts([]);
+    } finally {
+      setLoading(false);
     }
+  }, [selectedCategory, sortOption, currentPage, minPrice, maxPrice, selectedRating, searchQuery]);
 
-    // price range
-    result = result.filter(
-      (p) => p.price >= minPrice && p.price <= (maxPrice || priceMax)
-    );
-
-    // rating
-    if (selectedRating > 0) {
-      result = result.filter((p) => p.rating >= selectedRating);
-    }
-
-    return result;
-  }, [selectedCategory, searchQuery, minPrice, maxPrice, selectedRating]);
-
-  // Sort
-  const sortedProducts = useMemo(() => {
-    let arr = [...filteredProducts];
-    if (sortOption === "name-asc") arr.sort((a, b) => a.name.localeCompare(b.name));
-    if (sortOption === "price-low") arr.sort((a, b) => a.price - b.price);
-    if (sortOption === "price-high") arr.sort((a, b) => b.price - a.price);
-    if (sortOption === "rating") arr.sort((a, b) => b.rating - a.rating);
-    return arr;
-  }, [filteredProducts, sortOption]);
-
-  const totalPages = Math.ceil(sortedProducts.length / productsPerPage);
-  const indexOfLast = currentPage * productsPerPage;
-  const indexOfFirst = indexOfLast - productsPerPage;
-  const currentProducts = sortedProducts.slice(indexOfFirst, indexOfLast);
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
 
   const goToPage = (page) => {
     setCurrentPage(page);
@@ -90,7 +90,7 @@ const ProductsPage = () => {
   const resetFilters = () => {
     setSelectedCategory("all");
     setMinPrice(0);
-    setMaxPrice(priceMax);
+    setMaxPrice(PRICE_MAX);
     setSelectedRating(0);
     setSearchQuery("");
     setCurrentPage(1);
@@ -99,7 +99,7 @@ const ProductsPage = () => {
   const activeFilterCount = [
     selectedCategory !== "all",
     minPrice > 0,
-    maxPrice < priceMax,
+    maxPrice < PRICE_MAX,
     selectedRating > 0,
     searchQuery.trim().length > 0,
   ].filter(Boolean).length;
@@ -156,13 +156,13 @@ const ProductsPage = () => {
         <div className="space-y-3">
           <div className="flex items-center justify-between text-xs text-skin-charcoal/60">
             <span>Rs. {minPrice}</span>
-            <span>Rs. {maxPrice || priceMax}</span>
+            <span>Rs. {maxPrice}</span>
           </div>
           <input
             type="range"
             min={0}
-            max={priceMax}
-            value={maxPrice || priceMax}
+            max={PRICE_MAX}
+            value={maxPrice}
             onChange={(e) => { setMaxPrice(Number(e.target.value)); setCurrentPage(1); }}
             className="w-full accent-skin-terracotta cursor-pointer"
           />
@@ -180,7 +180,7 @@ const ProductsPage = () => {
               type="number"
               value={maxPrice}
               min={minPrice}
-              max={priceMax}
+              max={PRICE_MAX}
               onChange={(e) => { setMaxPrice(Number(e.target.value)); setCurrentPage(1); }}
               className="w-full border border-skin-sand/60 rounded-xl px-3 py-2 text-xs text-skin-charcoal outline-none focus:border-skin-sage bg-white"
               placeholder="Max"
@@ -196,7 +196,6 @@ const ProductsPage = () => {
         </label>
         <div className="space-y-2">
           <label
-            key={0}
             onClick={() => { setSelectedRating(0); setCurrentPage(1); }}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-xl cursor-pointer text-xs font-medium transition-all duration-200 ${
               selectedRating === 0
@@ -265,7 +264,7 @@ const ProductsPage = () => {
               </h1>
             </div>
             <p className="text-sm text-white/50 max-w-xs font-light">
-              {skincareProducts.length} handcrafted formulations for your unique skin
+              {total} handcrafted formulations for your unique skin
             </p>
           </div>
         </div>
@@ -300,7 +299,7 @@ const ProductsPage = () => {
                 <p className="text-xs text-skin-charcoal/50 uppercase tracking-wider">
                   Showing{" "}
                   <span className="text-skin-charcoal font-semibold">
-                    {sortedProducts.length}
+                    {total}
                   </span>{" "}
                   results
                 </p>
@@ -324,10 +323,10 @@ const ProductsPage = () => {
                         </button>
                       </span>
                     )}
-                    {(minPrice > 0 || maxPrice < priceMax) && (
+                    {(minPrice > 0 || maxPrice < PRICE_MAX) && (
                       <span className="inline-flex items-center gap-1.5 bg-skin-charcoal text-white text-[10px] px-3 py-1 rounded-full font-medium">
                         Rs. {minPrice}–{maxPrice}
-                        <button onClick={() => { setMinPrice(0); setMaxPrice(priceMax); setCurrentPage(1); }}>
+                        <button onClick={() => { setMinPrice(0); setMaxPrice(PRICE_MAX); setCurrentPage(1); }}>
                           <FiX size={10} />
                         </button>
                       </span>
@@ -388,8 +387,15 @@ const ProductsPage = () => {
               </div>
             </div>
 
-            {/* Product Grid */}
-            {currentProducts.length === 0 ? (
+            {/* Loading State */}
+            {loading ? (
+              <div className="flex flex-col items-center justify-center py-32 gap-4">
+                <div className="w-10 h-10 border-2 border-skin-terracotta border-t-transparent rounded-full animate-spin" />
+                <p className="text-xs uppercase tracking-wider text-skin-charcoal/50">
+                  Loading products...
+                </p>
+              </div>
+            ) : products.length === 0 ? (
               <div className="text-center py-24 bg-white rounded-2xl border border-skin-sand/30">
                 <p className="text-skin-charcoal/40 text-sm mb-4">
                   No products match your filters.
@@ -411,9 +417,9 @@ const ProductsPage = () => {
                       : "grid-cols-1"
                   }`}
                 >
-                  {currentProducts.map((product, i) => (
+                  {products.map((product, i) => (
                     <motion.div
-                      key={product.id}
+                      key={product._id || product.id}
                       layout
                       initial={{ opacity: 0, y: 16 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -428,7 +434,7 @@ const ProductsPage = () => {
             )}
 
             {/* Pagination */}
-            {totalPages > 1 && (
+            {!loading && totalPages > 1 && (
               <div className="flex justify-center mt-12 gap-2 flex-wrap">
                 <button
                   disabled={currentPage === 1}

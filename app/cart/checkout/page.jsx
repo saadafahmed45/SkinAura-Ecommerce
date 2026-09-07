@@ -1,12 +1,31 @@
 "use client";
 
 import { useCart } from "@/app/context/CartContext";
+import { useAuth } from "@/app/context/AuthContext";
 import { useState } from "react";
 import Link from "next/link";
 
 export default function Checkout() {
-  const { cartItems, subtotal, deliveryFee, total, placeOrder } = useCart();
+  const {
+    cartItems,
+    subtotal,
+    deliveryFee,
+    discount,
+    total,
+    placeOrder,
+    applyPromoCode,
+    appliedCoupon,
+  } = useCart();
+  const { user } = useAuth();
   const [paymentMethod, setPaymentMethod] = useState("cod");
+  const [couponInput, setCouponInput] = useState("");
+
+  const handleApplyCoupon = (e) => {
+    e.preventDefault();
+    if (couponInput.trim()) {
+      applyPromoCode(couponInput.trim());
+    }
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -16,6 +35,7 @@ export default function Checkout() {
       name: form.name.value,
       phone: form.phone.value,
       address: form.address.value,
+      email: user?.email || "",
       paymentMethod,
     };
 
@@ -156,11 +176,48 @@ export default function Checkout() {
 
             <hr className="border-skin-sand/20" />
 
+            {/* Coupon Code Box */}
+            <div className="space-y-2">
+              <label className="text-[10px] uppercase tracking-wider font-bold text-skin-charcoal/60">
+                Promo or Gift Code
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder="e.g. GLOW20"
+                  value={couponInput}
+                  onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
+                  className="flex-1 uppercase text-xs px-3 py-2 rounded-xl border border-skin-sand bg-skin-cream/10 focus:outline-none focus:border-skin-sage"
+                />
+                <button
+                  type="button"
+                  onClick={handleApplyCoupon}
+                  className="px-3 py-2 bg-skin-sand hover:bg-skin-sage hover:text-white text-skin-charcoal text-[10px] uppercase font-bold tracking-wider rounded-xl transition"
+                >
+                  Apply
+                </button>
+              </div>
+              {appliedCoupon && (
+                <p className="text-[11px] text-green-600 font-medium">
+                  ✓ {appliedCoupon.code} applied ({appliedCoupon.discountPercentage}% off)
+                </p>
+              )}
+            </div>
+
+            <hr className="border-skin-sand/20" />
+
             <div className="space-y-3 text-xs uppercase tracking-wider text-skin-charcoal/60">
               <div className="flex justify-between">
                 <span>Subtotal</span>
                 <span className="font-semibold text-skin-charcoal">${Number(subtotal || 0).toFixed(2)}</span>
               </div>
+
+              {discount > 0 && (
+                <div className="flex justify-between text-green-600 font-semibold">
+                  <span>Discount</span>
+                  <span>-${Number(discount || 0).toFixed(2)}</span>
+                </div>
+              )}
 
               <div className="flex justify-between">
                 <span>Delivery</span>

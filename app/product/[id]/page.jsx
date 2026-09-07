@@ -1,27 +1,65 @@
 "use client";
 
-import { skincareProducts } from "@/app/api/skinData";
 import ProductCard from "@/app/components/ProductCard";
 import { useCart } from "@/app/context/CartContext";
+import api from "@/app/lib/api";
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 const ProductDetails = ({ params }) => {
   const { id } = React.use(params);
-  const product = skincareProducts.find((m) => m.id === parseInt(id));
-
   const { handleAddedCart } = useCart();
+
+  const [product, setProduct] = useState(null);
+  const [relatedProducts, setRelatedProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [notFound, setNotFound] = useState(false);
+  const [selectedImage, setSelectedImage] = useState("");
+
+  useEffect(() => {
+    const fetchProduct = async () => {
+      setLoading(true);
+      try {
+        const res = await api.get(`/products/${id}`);
+        const p = res.data?.product || res.data?.data;
+        if (!p) {
+          setNotFound(true);
+          return;
+        }
+        setProduct(p);
+        setSelectedImage(p.images?.[0] || "");
+
+        // Fetch related products
+        const relRes = await api.get(`/products?category=${encodeURIComponent(p.category)}&limit=5`);
+        const all = relRes.data?.products || relRes.data?.data || [];
+        setRelatedProducts(
+          all.filter((rp) => (rp._id || rp.id) !== (p._id || p.id)).slice(0, 4)
+        );
+      } catch {
+        setNotFound(true);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProduct();
+  }, [id]);
 
   const handleAddToCart = (e) => {
     e.preventDefault();
-    handleAddedCart(product);
+    if (product) handleAddedCart(product);
   };
 
-  const [selectedImage, setSelectedImage] = useState(
-    product?.images?.[0] || "",
-  );
+  if (loading) {
+    return (
+      <div className="h-screen flex flex-col items-center justify-center bg-skin-cream/10 gap-4">
+        <div className="w-10 h-10 border-2 border-skin-terracotta border-t-transparent rounded-full animate-spin" />
+        <p className="text-xs uppercase tracking-wider text-skin-charcoal/50">Loading product...</p>
+      </div>
+    );
+  }
 
-  if (!product) {
+  if (notFound || !product) {
     return (
       <div className="h-screen flex flex-col items-center justify-center bg-skin-cream">
         <p className="text-skin-terracotta text-lg font-serif mb-4">
@@ -36,10 +74,6 @@ const ProductDetails = ({ params }) => {
       </div>
     );
   }
-
-  const relatedProducts = skincareProducts
-    .filter((m) => m.category === product.category && m.id !== product.id)
-    .slice(0, 4);
 
   return (
     <div className="px-6 lg:px-16 xl:px-24 py-28 mx-auto bg-skin-cream/10">
@@ -77,34 +111,36 @@ const ProductDetails = ({ params }) => {
           {/* Main Image */}
           <div className="rounded-2xl overflow-hidden border border-skin-sand/40 bg-white aspect-square shadow-sm flex items-center justify-center p-6">
             <img
-              src={selectedImage}
+              src={selectedImage || "https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=600&q=80"}
               alt={product.name}
               className="w-full h-full object-contain transition-transform duration-500 hover:scale-102"
             />
           </div>
 
           {/* Thumbnails */}
-          <div className="flex flex-wrap gap-3 mt-2">
-            {product.images?.map((img, i) => (
-              <button
-                key={i}
-                onClick={() => setSelectedImage(img)}
-                className={`relative w-20 h-20 border rounded-xl overflow-hidden flex items-center justify-center bg-white p-2 transition-all duration-300
-                ${
-                  selectedImage === img
-                    ? "ring-2 ring-skin-terracotta border-skin-terracotta"
-                    : "hover:ring-1 hover:ring-skin-sage border-skin-sand"
-                }`}
-              >
-                <img
-                  src={img}
-                  alt={`Thumbnail ${i + 1}`}
-                  loading="lazy"
-                  className="w-full h-full object-contain"
-                />
-              </button>
-            ))}
-          </div>
+          {product.images?.length > 1 && (
+            <div className="flex flex-wrap gap-3 mt-2">
+              {product.images.map((img, i) => (
+                <button
+                  key={i}
+                  onClick={() => setSelectedImage(img)}
+                  className={`relative w-20 h-20 border rounded-xl overflow-hidden flex items-center justify-center bg-white p-2 transition-all duration-300
+                  ${
+                    selectedImage === img
+                      ? "ring-2 ring-skin-terracotta border-skin-terracotta"
+                      : "hover:ring-1 hover:ring-skin-sage border-skin-sand"
+                  }`}
+                >
+                  <img
+                    src={img}
+                    alt={`Thumbnail ${i + 1}`}
+                    loading="lazy"
+                    className="w-full h-full object-contain"
+                  />
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Product Info */}
@@ -123,7 +159,7 @@ const ProductDetails = ({ params }) => {
             <h2 className="text-3xl font-bold text-skin-terracotta">
               $
               {Number(
-                product.discountPrice
+                product.discount > 0 && product.discountPrice
                   ? product.discountPrice
                   : product.price || 0,
               ).toFixed(2)}
@@ -144,10 +180,10 @@ const ProductDetails = ({ params }) => {
           <div className="flex items-center gap-2">
             <span
               className={`w-2.5 h-2.5 rounded-full ${product.inStock ? "bg-green-500" : "bg-red-500"}`}
-            ></span>
+            />
             <p className="text-xs uppercase tracking-wider font-semibold text-skin-charcoal/70">
               {product.inStock
-                ? `In Stock (${product.stock} products available)`
+                ? `In Stock (${product.stock} available)`
                 : "Temporarily Out of Stock"}
             </p>
           </div>
@@ -155,12 +191,14 @@ const ProductDetails = ({ params }) => {
           <hr className="border-skin-sand/40" />
 
           {/* Description */}
-          <p className="text-sm text-skin-charcoal/80 leading-relaxed font-light font-sans">
-            {product.description}
-          </p>
+          {product.description && (
+            <p className="text-sm text-skin-charcoal/80 leading-relaxed font-light font-sans">
+              {product.description}
+            </p>
+          )}
 
           {/* Ingredients */}
-          {product.ingredients && (
+          {product.ingredients?.length > 0 && (
             <div className="space-y-2">
               <h3 className="text-xs uppercase tracking-widest font-bold text-skin-charcoal">
                 Actives & Ingredients
@@ -179,7 +217,7 @@ const ProductDetails = ({ params }) => {
           )}
 
           {/* Skin Type */}
-          {product.skinType && (
+          {product.skinType?.length > 0 && (
             <div className="space-y-1">
               <h3 className="text-xs uppercase tracking-widest font-bold text-skin-charcoal">
                 Recommended Skin Type
@@ -191,7 +229,7 @@ const ProductDetails = ({ params }) => {
           )}
 
           {/* Tags */}
-          {product.tags && (
+          {product.tags?.length > 0 && (
             <div className="flex flex-wrap gap-2 pt-1">
               {product.tags.map((t, i) => (
                 <span
@@ -242,8 +280,8 @@ const ProductDetails = ({ params }) => {
           </h2>
 
           <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-6">
-            {relatedProducts.map((product) => (
-              <ProductCard product={product} key={product.id} />
+            {relatedProducts.map((rp) => (
+              <ProductCard product={rp} key={rp._id || rp.id} />
             ))}
           </div>
         </div>
