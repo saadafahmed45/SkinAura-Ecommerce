@@ -3,7 +3,14 @@
 import React, { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "../context/AuthContext";
-import { FiMail, FiLock, FiUser, FiArrowRight, FiCheckCircle } from "react-icons/fi";
+import {
+  FiMail,
+  FiLock,
+  FiUser,
+  FiArrowRight,
+  FiCheckCircle,
+  FiShield,
+} from "react-icons/fi";
 import Link from "next/link";
 
 const LoginPage = () => {
@@ -11,7 +18,7 @@ const LoginPage = () => {
   const searchParams = useSearchParams();
   const redirectUrl = searchParams.get("redirect") || "/";
 
-  const { login, register, user } = useAuth();
+  const { login, register, loginWithGoogle, user } = useAuth();
 
   const [mode, setMode] = useState("login"); // "login" | "register"
   const [formData, setFormData] = useState({
@@ -23,6 +30,7 @@ const LoginPage = () => {
   const [error, setError] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [googleSubmitting, setGoogleSubmitting] = useState(false);
 
   // If already logged in, redirect
   React.useEffect(() => {
@@ -41,6 +49,29 @@ const LoginPage = () => {
       [e.target.name]: e.target.value,
     }));
     setError("");
+  };
+
+  const handleGoogleAuth = async () => {
+    setError("");
+    setSuccessMsg("");
+    setGoogleSubmitting(true);
+
+    try {
+      // Customer sign-in/registration via Google
+      const loggedUser = await loginWithGoogle("customer");
+      setSuccessMsg(`Welcome, ${loggedUser.name}!`);
+      setTimeout(() => {
+        if (loggedUser?.role === "admin") {
+          router.push("/admin");
+        } else {
+          router.push(redirectUrl);
+        }
+      }, 500);
+    } catch (err) {
+      setError(err.message || "Google authentication failed.");
+    } finally {
+      setGoogleSubmitting(false);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -81,54 +112,34 @@ const LoginPage = () => {
           setSubmitting(false);
           return;
         }
+
+        // Customer registration only
         const registeredUser = await register({
           name: formData.name,
           email: formData.email,
           password: formData.password,
+          role: "customer",
         });
         setSuccessMsg("Account created successfully!");
         setTimeout(() => {
-          if (registeredUser?.role === "admin") {
-            router.push("/admin");
-          } else {
-            router.push(redirectUrl);
-          }
+          router.push(redirectUrl);
         }, 500);
       }
     } catch (err) {
       setError(
-        err.response?.data?.message || err.message || "Authentication failed. Please try again."
+        err.response?.data?.message ||
+          err.message ||
+          "Authentication failed. Please check your credentials."
       );
     } finally {
       setSubmitting(false);
     }
   };
 
-  const fillDemo = (role) => {
-    if (role === "admin") {
-      setFormData({
-        name: "Admin User",
-        email: "admin@skinaura.com",
-        password: "AdminPassword123!",
-        confirmPassword: "AdminPassword123!",
-      });
-      setMode("login");
-    } else {
-      setFormData({
-        name: "Customer User",
-        email: "customer@skinaura.com",
-        password: "CustomerPassword123!",
-        confirmPassword: "CustomerPassword123!",
-      });
-      setMode("login");
-    }
-    setError("");
-  };
-
   return (
-    <div className="px-4 md:px-6 py-24 flex justify-center items-center bg-skin-cream/10 min-h-screen">
-      <div className="flex w-full max-w-sm mx-auto overflow-hidden bg-white rounded-3xl border border-skin-sand/35 shadow-xl lg:max-w-4xl">
-        {/* Left-side image */}
+    <div className="px-4 md:px-6 py-20 flex justify-center items-center bg-[#FAF7F2]/50 min-h-screen">
+      <div className="flex w-full max-w-sm mx-auto overflow-hidden bg-white rounded-3xl border border-skin-sand/60 shadow-xl lg:max-w-4xl">
+        {/* Left-side luxury banner */}
         <div
           className="hidden bg-cover bg-center lg:block lg:w-1/2 relative"
           style={{
@@ -136,7 +147,7 @@ const LoginPage = () => {
               "url('https://images.pexels.com/photos/3736397/pexels-photo-3736397.jpeg')",
           }}
         >
-          <div className="absolute inset-0 bg-gradient-to-t from-skin-charcoal/80 via-skin-charcoal/20 to-transparent flex flex-col justify-end p-10 text-white">
+          <div className="absolute inset-0 bg-gradient-to-t from-skin-charcoal/90 via-skin-charcoal/30 to-transparent flex flex-col justify-end p-10 text-white">
             <span className="text-xs uppercase tracking-[0.25em] text-skin-sand font-semibold">
               Pure Botanical Luxury
             </span>
@@ -144,34 +155,36 @@ const LoginPage = () => {
               Elevate your daily ritual with conscious skincare.
             </h3>
             <p className="text-xs text-white/75 mt-3 leading-relaxed font-light">
-              Join our community of mindful beauty enthusiasts and receive personalized routine recommendations.
+              Join our community of mindful beauty enthusiasts and receive tailored routine recommendations and order tracking.
             </p>
           </div>
         </div>
 
         {/* Right-side form */}
         <div className="w-full px-6 py-10 md:px-10 lg:w-1/2 flex flex-col justify-center">
-          {/* Logo & Heading */}
+          {/* Brand Heading */}
           <div className="text-center mb-6">
-            <h2 className="text-3xl tracking-widest font-serif text-skin-charcoal">
-              SKINAURA
+            <h2 className="text-3xl tracking-[0.2em] font-serif text-skin-charcoal font-medium">
+              SKIN-AURA
             </h2>
-            <p className="mt-2 text-xs uppercase tracking-wider text-skin-charcoal/50">
-              {mode === "login" ? "Welcome back to your skin ritual" : "Begin your skin ritual journey"}
+            <p className="mt-1.5 text-xs uppercase tracking-wider text-skin-charcoal/50">
+              {mode === "login"
+                ? "Sign in to access your orders & ritual"
+                : "Create your customer account"}
             </p>
           </div>
 
-          {/* Mode Tabs */}
-          <div className="grid grid-cols-2 p-1 bg-skin-cream/30 border border-skin-sand/40 rounded-2xl mb-6">
+          {/* Mode Switch Tabs (Sign In / Create Account) */}
+          <div className="grid grid-cols-2 p-1 bg-skin-cream/40 border border-skin-sand/60 rounded-2xl mb-6">
             <button
               type="button"
               onClick={() => {
                 setMode("login");
                 setError("");
               }}
-              className={`py-2 text-xs font-semibold uppercase tracking-wider rounded-xl transition-all duration-200 ${
+              className={`py-2 text-xs font-semibold uppercase tracking-wider rounded-xl transition-all duration-200 cursor-pointer ${
                 mode === "login"
-                  ? "bg-white text-skin-charcoal shadow-sm"
+                  ? "bg-white text-skin-charcoal shadow-xs"
                   : "text-skin-charcoal/60 hover:text-skin-charcoal"
               }`}
             >
@@ -183,9 +196,9 @@ const LoginPage = () => {
                 setMode("register");
                 setError("");
               }}
-              className={`py-2 text-xs font-semibold uppercase tracking-wider rounded-xl transition-all duration-200 ${
+              className={`py-2 text-xs font-semibold uppercase tracking-wider rounded-xl transition-all duration-200 cursor-pointer ${
                 mode === "register"
-                  ? "bg-white text-skin-charcoal shadow-sm"
+                  ? "bg-white text-skin-charcoal shadow-xs"
                   : "text-skin-charcoal/60 hover:text-skin-charcoal"
               }`}
             >
@@ -193,27 +206,47 @@ const LoginPage = () => {
             </button>
           </div>
 
-          {/* Quick Demo Credentials Buttons */}
-          <div className="mb-6 p-3 bg-skin-cream/20 rounded-2xl border border-skin-sand/30 flex flex-col gap-2">
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] uppercase font-bold tracking-wider text-skin-charcoal/50">
-                Demo Auto-Fill:
+          {/* ── GOOGLE SIGN-IN BUTTON FOR CUSTOMERS ── */}
+          <div className="mb-5">
+            <button
+              type="button"
+              disabled={googleSubmitting}
+              onClick={handleGoogleAuth}
+              className="w-full flex items-center justify-center gap-2.5 py-2.5 px-4 rounded-xl border border-skin-sand/90 bg-white hover:bg-skin-sand/30 text-skin-charcoal text-xs font-semibold tracking-wider transition-all duration-200 cursor-pointer shadow-xs disabled:opacity-50"
+            >
+              {/* Google Brand Color SVG */}
+              <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+                <path
+                  fill="#4285F4"
+                  d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"
+                />
+                <path
+                  fill="#34A853"
+                  d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"
+                />
+                <path
+                  fill="#FBBC05"
+                  d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 10.04 0 12s.45 3.82 1.25 5.42l4.03-3.15z"
+                />
+                <path
+                  fill="#EA4335"
+                  d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"
+                />
+              </svg>
+              <span>
+                {googleSubmitting ? "Connecting with Google..." : "Continue with Google"}
               </span>
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => fillDemo("customer")}
-                  className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-lg bg-skin-sand/40 hover:bg-skin-sand text-skin-charcoal transition"
-                >
-                  Customer
-                </button>
-                <button
-                  type="button"
-                  onClick={() => fillDemo("admin")}
-                  className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-lg bg-skin-terracotta/15 hover:bg-skin-terracotta/25 text-skin-terracotta transition"
-                >
-                  Admin
-                </button>
+            </button>
+
+            {/* Divider */}
+            <div className="relative my-4">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-skin-sand/60" />
+              </div>
+              <div className="relative flex justify-center text-[10px] uppercase tracking-wider">
+                <span className="bg-white px-2 text-skin-charcoal/40 font-semibold">
+                  Or continue with email
+                </span>
               </div>
             </div>
           </div>
@@ -231,15 +264,15 @@ const LoginPage = () => {
             </div>
           )}
 
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Email / Password Form */}
+          <form onSubmit={handleSubmit} className="space-y-3.5">
             {mode === "register" && (
-              <div className="space-y-1.5">
-                <label className="text-[11px] uppercase tracking-wider font-bold text-skin-charcoal/60">
+              <div className="space-y-1">
+                <label className="text-[10.5px] uppercase tracking-wider font-bold text-skin-charcoal/60">
                   Full Name
                 </label>
                 <div className="relative">
-                  <FiUser className="absolute left-3.5 top-3.5 text-skin-charcoal/40" size={15} />
+                  <FiUser className="absolute left-3.5 top-3.5 text-skin-charcoal/40" size={14} />
                   <input
                     name="name"
                     type="text"
@@ -247,18 +280,18 @@ const LoginPage = () => {
                     onChange={handleChange}
                     placeholder="Jane Doe"
                     required
-                    className="block w-full pl-10 pr-4 py-3 text-sm text-skin-charcoal bg-skin-cream/10 border border-skin-sand/60 rounded-xl focus:border-skin-terracotta focus:ring-1 focus:ring-skin-terracotta focus:outline-none"
+                    className="block w-full pl-9 pr-4 py-2.5 text-xs text-skin-charcoal bg-skin-cream/20 border border-skin-sand rounded-xl focus:border-skin-terracotta focus:outline-none"
                   />
                 </div>
               </div>
             )}
 
-            <div className="space-y-1.5">
-              <label className="text-[11px] uppercase tracking-wider font-bold text-skin-charcoal/60">
+            <div className="space-y-1">
+              <label className="text-[10.5px] uppercase tracking-wider font-bold text-skin-charcoal/60">
                 Email Address
               </label>
               <div className="relative">
-                <FiMail className="absolute left-3.5 top-3.5 text-skin-charcoal/40" size={15} />
+                <FiMail className="absolute left-3.5 top-3.5 text-skin-charcoal/40" size={14} />
                 <input
                   name="email"
                   type="email"
@@ -266,19 +299,17 @@ const LoginPage = () => {
                   onChange={handleChange}
                   placeholder="name@example.com"
                   required
-                  className="block w-full pl-10 pr-4 py-3 text-sm text-skin-charcoal bg-skin-cream/10 border border-skin-sand/60 rounded-xl focus:border-skin-terracotta focus:ring-1 focus:ring-skin-terracotta focus:outline-none"
+                  className="block w-full pl-9 pr-4 py-2.5 text-xs text-skin-charcoal bg-skin-cream/20 border border-skin-sand rounded-xl focus:border-skin-terracotta focus:outline-none"
                 />
               </div>
             </div>
 
-            <div className="space-y-1.5">
-              <div className="flex justify-between items-center">
-                <label className="text-[11px] uppercase tracking-wider font-bold text-skin-charcoal/60">
-                  Password
-                </label>
-              </div>
+            <div className="space-y-1">
+              <label className="text-[10.5px] uppercase tracking-wider font-bold text-skin-charcoal/60">
+                Password
+              </label>
               <div className="relative">
-                <FiLock className="absolute left-3.5 top-3.5 text-skin-charcoal/40" size={15} />
+                <FiLock className="absolute left-3.5 top-3.5 text-skin-charcoal/40" size={14} />
                 <input
                   name="password"
                   type="password"
@@ -286,18 +317,18 @@ const LoginPage = () => {
                   onChange={handleChange}
                   placeholder="••••••••"
                   required
-                  className="block w-full pl-10 pr-4 py-3 text-sm text-skin-charcoal bg-skin-cream/10 border border-skin-sand/60 rounded-xl focus:border-skin-terracotta focus:ring-1 focus:ring-skin-terracotta focus:outline-none"
+                  className="block w-full pl-9 pr-4 py-2.5 text-xs text-skin-charcoal bg-skin-cream/20 border border-skin-sand rounded-xl focus:border-skin-terracotta focus:outline-none"
                 />
               </div>
             </div>
 
             {mode === "register" && (
-              <div className="space-y-1.5">
-                <label className="text-[11px] uppercase tracking-wider font-bold text-skin-charcoal/60">
+              <div className="space-y-1">
+                <label className="text-[10.5px] uppercase tracking-wider font-bold text-skin-charcoal/60">
                   Confirm Password
                 </label>
                 <div className="relative">
-                  <FiLock className="absolute left-3.5 top-3.5 text-skin-charcoal/40" size={15} />
+                  <FiLock className="absolute left-3.5 top-3.5 text-skin-charcoal/40" size={14} />
                   <input
                     name="confirmPassword"
                     type="password"
@@ -305,7 +336,7 @@ const LoginPage = () => {
                     onChange={handleChange}
                     placeholder="••••••••"
                     required
-                    className="block w-full pl-10 pr-4 py-3 text-sm text-skin-charcoal bg-skin-cream/10 border border-skin-sand/60 rounded-xl focus:border-skin-terracotta focus:ring-1 focus:ring-skin-terracotta focus:outline-none"
+                    className="block w-full pl-9 pr-4 py-2.5 text-xs text-skin-charcoal bg-skin-cream/20 border border-skin-sand rounded-xl focus:border-skin-terracotta focus:outline-none"
                   />
                 </div>
               </div>
@@ -314,33 +345,44 @@ const LoginPage = () => {
             <button
               type="submit"
               disabled={submitting}
-              className="w-full mt-4 flex items-center justify-center gap-2 px-6 py-3.5 text-xs uppercase tracking-widest font-bold text-white bg-skin-charcoal rounded-xl hover:bg-skin-terracotta transition-all duration-300 shadow-md disabled:opacity-50 cursor-pointer"
+              className="w-full mt-3 flex items-center justify-center gap-2 px-6 py-3 text-xs uppercase tracking-widest font-bold text-white bg-skin-charcoal rounded-xl hover:bg-skin-terracotta transition-all duration-300 shadow-sm disabled:opacity-50 cursor-pointer"
             >
               {submitting ? (
                 <span>Processing...</span>
               ) : (
                 <>
-                  <span>{mode === "login" ? "Sign In" : "Register Now"}</span>
-                  <FiArrowRight size={14} />
+                  <span>{mode === "login" ? "Sign In" : "Create Account"}</span>
+                  <FiArrowRight size={13} />
                 </>
               )}
             </button>
           </form>
 
-          {/* Bottom Switch Note */}
-          <div className="text-center mt-6">
+          {/* Bottom toggle between Login & Register */}
+          <div className="text-center mt-5">
             <button
               type="button"
               onClick={() => {
                 setMode(mode === "login" ? "register" : "login");
                 setError("");
               }}
-              className="text-xs text-skin-charcoal/60 hover:text-skin-terracotta transition-colors"
+              className="text-xs text-skin-charcoal/60 hover:text-skin-terracotta transition-colors cursor-pointer"
             >
               {mode === "login"
                 ? "Don't have an account? Create one"
                 : "Already have an account? Sign in"}
             </button>
+          </div>
+
+          {/* Dedicated Administrator Portal Link */}
+          <div className="text-center mt-4 pt-4 border-t border-skin-sand/40">
+            <Link
+              href="/admin/login"
+              className="text-[11px] font-semibold text-skin-charcoal/50 hover:text-skin-terracotta transition-colors inline-flex items-center gap-1.5"
+            >
+              <FiShield size={12} className="text-skin-terracotta" />
+              <span>Store Administrator? Sign In to Admin Portal →</span>
+            </Link>
           </div>
         </div>
       </div>

@@ -23,6 +23,20 @@ const AdminLayout = ({ children }) => {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  const isLoginPage = pathname === "/admin/login";
+
+  // Redirect unauthenticated or non-admin users to dedicated /admin/login
+  React.useEffect(() => {
+    if (!loading && !isLoginPage && (!user || !isAdmin)) {
+      router.replace("/admin/login");
+    }
+  }, [user, isAdmin, loading, isLoginPage, router]);
+
+  // If on admin login page, render children directly without dashboard sidebar or guards
+  if (isLoginPage) {
+    return <>{children}</>;
+  }
+
   // Authentication check
   if (loading) {
     return (
@@ -45,17 +59,17 @@ const AdminLayout = ({ children }) => {
             <FiShield size={32} />
           </div>
           <div>
-            <h2 className="text-2xl font-serif text-skin-charcoal">Access Restricted</h2>
+            <h2 className="text-2xl font-serif text-skin-charcoal">Administrator Access Only</h2>
             <p className="text-xs text-skin-charcoal/60 mt-2">
-              You must be logged in as an administrator to view the SkinAura control center.
+              You must be logged in as an authorized administrator to view the Skin-Aura control center.
             </p>
           </div>
           <div className="flex flex-col gap-3">
             <Link
-              href="/login?redirect=/admin"
+              href="/admin/login"
               className="w-full py-3 bg-skin-charcoal hover:bg-skin-terracotta text-white rounded-xl text-xs uppercase tracking-wider font-bold transition duration-300"
             >
-              Sign In as Admin
+              Sign In to Administrator Portal
             </Link>
             <Link
               href="/"

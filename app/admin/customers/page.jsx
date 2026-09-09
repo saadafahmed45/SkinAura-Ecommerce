@@ -48,6 +48,25 @@ const AdminCustomers = () => {
     }
   };
 
+  const handleRoleChange = async (customer, newRole) => {
+    if (customer.role === newRole) return;
+    setUpdatingId(customer._id);
+    try {
+      const res = await api.patch(`/admin/customers/${customer._id}/role`, {
+        role: newRole,
+      });
+      if (res.data?.user) {
+        setCustomers((prev) =>
+          prev.map((c) => (c._id === customer._id ? res.data.user : c))
+        );
+      }
+    } catch (err) {
+      alert(err.response?.data?.message || "Failed to update user role");
+    } finally {
+      setUpdatingId(null);
+    }
+  };
+
   const filteredCustomers = customers.filter(
     (c) =>
       c.name?.toLowerCase().includes(search.toLowerCase()) ||
@@ -124,15 +143,20 @@ const AdminCustomers = () => {
                         </div>
                       </td>
                       <td className="py-4 px-4">
-                        <span
-                          className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                        <select
+                          value={cust.role}
+                          onChange={(e) => handleRoleChange(cust, e.target.value)}
+                          disabled={updatingId === cust._id}
+                          aria-label="Select user role"
+                          className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider border outline-none cursor-pointer ${
                             cust.role === "admin"
-                              ? "bg-purple-100 text-purple-800"
-                              : "bg-skin-cream/40 text-skin-charcoal/70"
+                              ? "bg-purple-50 text-purple-800 border-purple-300 font-bold"
+                              : "bg-white text-skin-charcoal/80 border-skin-sand hover:border-skin-terracotta/50"
                           }`}
                         >
-                          {cust.role}
-                        </span>
+                          <option value="customer">Customer</option>
+                          <option value="admin">Admin</option>
+                        </select>
                       </td>
                       <td className="py-4 px-4">
                         <span

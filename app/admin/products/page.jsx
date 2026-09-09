@@ -124,6 +124,8 @@ const AdminProducts = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all"); // 'all' | 'top-selling' | 'featured'
+  const [togglingId, setTogglingId] = useState(null);
 
   // Modal states
   const [modalOpen, setModalOpen] = useState(false);
@@ -157,6 +159,7 @@ const AdminProducts = () => {
     rating: "4.8",
     reviewCount: "0",
     isFeatured: false,
+    isTopSelling: false,
     shortDescription: "",
     description: "",
   });
@@ -226,6 +229,7 @@ const AdminProducts = () => {
       rating: "4.8",
       reviewCount: "0",
       isFeatured: false,
+      isTopSelling: false,
       shortDescription: "",
       description: "",
     });
@@ -266,6 +270,7 @@ const AdminProducts = () => {
           ? String(p.reviewCount)
           : "0",
       isFeatured: Boolean(p.isFeatured),
+      isTopSelling: Boolean(p.isTopSelling),
       shortDescription: p.shortDescription || "",
       description: p.description || "",
     });
@@ -469,6 +474,7 @@ const AdminProducts = () => {
             ? parseInt(form.reviewCount, 10)
             : 0,
         isFeatured: Boolean(form.isFeatured),
+        isTopSelling: Boolean(form.isTopSelling),
         images:
           selectedImages.length > 0
             ? selectedImages
@@ -510,6 +516,40 @@ const AdminProducts = () => {
     }
   };
 
+  // Instant 1-click toggle for Top Selling status
+  const handleToggleTopSelling = async (e, p) => {
+    e.stopPropagation();
+    const prodId = p._id || p.id;
+    const newStatus = !p.isTopSelling;
+
+    // Optimistic UI update
+    setProducts((prev) =>
+      prev.map((item) =>
+        (item._id || item.id) === prodId
+          ? { ...item, isTopSelling: newStatus }
+          : item
+      )
+    );
+
+    setTogglingId(prodId);
+    try {
+      await api.patch(`/products/${prodId}`, { isTopSelling: newStatus });
+    } catch (err) {
+      console.error("Failed to toggle top selling status:", err);
+      // Revert on error
+      setProducts((prev) =>
+        prev.map((item) =>
+          (item._id || item.id) === prodId
+            ? { ...item, isTopSelling: !newStatus }
+            : item
+        )
+      );
+      alert(err.response?.data?.message || "Failed to update top selling status");
+    } finally {
+      setTogglingId(null);
+    }
+  };
+
   const handleDelete = async (p) => {
     if (!window.confirm(`Are you sure you want to delete "${p.name}"?`)) return;
 
@@ -528,8 +568,19 @@ const AdminProducts = () => {
     const matchesCat =
       selectedCategory === "all" ||
       p.category?.toLowerCase() === selectedCategory.toLowerCase();
-    return matchesSearch && matchesCat;
+    const matchesStatus =
+      statusFilter === "all"
+        ? true
+        : statusFilter === "top-selling"
+        ? Boolean(p.isTopSelling)
+        : statusFilter === "featured"
+        ? Boolean(p.isFeatured)
+        : true;
+    return matchesSearch && matchesCat && matchesStatus;
   });
+
+  const topSellingCount = products.filter((p) => Boolean(p.isTopSelling)).length;
+  const featuredCount = products.filter((p) => Boolean(p.isFeatured)).length;
 
   // Flat list or filtered list for curated gallery
   const allGalleryItems = CURATED_GALLERY.flatMap((g) => g.items);
@@ -561,32 +612,89 @@ const AdminProducts = () => {
       </div>
 
       {/* Filters Bar */}
-      <div className="bg-white p-4 rounded-3xl border border-skin-sand/35 shadow-sm flex flex-col sm:flex-row gap-4 justify-between items-center">
-        <div className="relative w-full sm:w-80">
-          <FiSearch className="absolute left-3.5 top-3.5 text-skin-charcoal/40" size={15} />
-          <input
-            type="text"
-            placeholder="Search formulas by title or brand..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 text-xs bg-skin-cream/20 border border-skin-sand/50 rounded-xl focus:outline-none focus:border-skin-terracotta text-skin-charcoal"
-          />
+      <div className="bg-white p-4 rounded-3xl border border-skin-sand/35 shadow-sm flex flex-col lg:flex-row gap-4 justify-between items-stretch lg:items-center">
+        <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center flex-1">
+          <div className="relative w-full sm:w-72">
+            <FiSearch className="absolute left-3.5 top-3.5 text-skin-charcoal/40" size={15} />
+            <input
+              type="text"
+              placeholder="Search formulas by title or brand..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 text-xs bg-skin-cream/20 border border-skin-sand/50 rounded-xl focus:outline-none focus:border-skin-terracotta text-skin-charcoal"
+            />
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-skin-charcoal/60 font-semibold whitespace-nowrap">Category:</span>
+            <select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className="px-3 py-2 text-xs bg-skin-cream/20 border border-skin-sand/50 rounded-xl focus:outline-none text-skin-charcoal"
+            >
+              <option value="all">All Categories</option>
+              {categories.map((c) => (
+                <option key={c._id || c.name} value={c.name}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
-        <div className="flex items-center gap-2 w-full sm:w-auto">
-          <span className="text-xs text-skin-charcoal/60 font-semibold">Category:</span>
-          <select
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
-            className="px-3 py-2 text-xs bg-skin-cream/20 border border-skin-sand/50 rounded-xl focus:outline-none text-skin-charcoal"
+        {/* Quick Status Filter Tabs */}
+        <div className="flex items-center gap-1.5 p-1 bg-skin-cream/30 border border-skin-sand/40 rounded-2xl self-start sm:self-auto overflow-x-auto">
+          <button
+            type="button"
+            onClick={() => setStatusFilter("all")}
+            className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition whitespace-nowrap ${
+              statusFilter === "all"
+                ? "bg-skin-charcoal text-white shadow-xs"
+                : "text-skin-charcoal/60 hover:text-skin-charcoal"
+            }`}
           >
-            <option value="all">All Categories</option>
-            {categories.map((c) => (
-              <option key={c._id || c.name} value={c.name}>
-                {c.name}
-              </option>
-            ))}
-          </select>
+            All ({products.length})
+          </button>
+          <button
+            type="button"
+            onClick={() => setStatusFilter("top-selling")}
+            className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition flex items-center gap-1.5 whitespace-nowrap ${
+              statusFilter === "top-selling"
+                ? "bg-amber-600 text-white shadow-xs"
+                : "text-amber-800 hover:text-amber-900 bg-amber-500/10 border border-amber-500/20"
+            }`}
+          >
+            <span>⭐ Top Selling</span>
+            <span
+              className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${
+                statusFilter === "top-selling"
+                  ? "bg-white/25 text-white"
+                  : "bg-amber-500/20 text-amber-800"
+              }`}
+            >
+              {topSellingCount}
+            </span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setStatusFilter("featured")}
+            className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition flex items-center gap-1.5 whitespace-nowrap ${
+              statusFilter === "featured"
+                ? "bg-skin-terracotta text-white shadow-xs"
+                : "text-skin-charcoal/60 hover:text-skin-charcoal"
+            }`}
+          >
+            <span>✨ Featured</span>
+            <span
+              className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${
+                statusFilter === "featured"
+                  ? "bg-white/25 text-white"
+                  : "bg-skin-sand/50 text-skin-charcoal"
+              }`}
+            >
+              {featuredCount}
+            </span>
+          </button>
         </div>
       </div>
 
@@ -600,7 +708,7 @@ const AdminProducts = () => {
                 <th className="py-3.5 px-4 font-semibold">Category</th>
                 <th className="py-3.5 px-4 font-semibold">Price</th>
                 <th className="py-3.5 px-4 font-semibold">Stock</th>
-                <th className="py-3.5 px-4 font-semibold">Rating</th>
+                <th className="py-3.5 px-4 font-semibold text-center">Top Selling (Homepage)</th>
                 <th className="py-3.5 px-6 font-semibold text-right">Actions</th>
               </tr>
             </thead>
@@ -619,6 +727,8 @@ const AdminProducts = () => {
                 </tr>
               ) : (
                 filteredProducts.map((p) => {
+                  const prodId = p._id || p.id;
+                  const isBusy = togglingId === prodId;
                   const stockStatus =
                     p.stock <= 0
                       ? { label: "Out of Stock", class: "bg-red-100 text-red-700" }
@@ -627,7 +737,7 @@ const AdminProducts = () => {
                       : { label: `${p.stock} units`, class: "bg-emerald-100 text-emerald-800" };
 
                   return (
-                    <tr key={p._id || p.id} className="hover:bg-skin-cream/10 transition">
+                    <tr key={prodId} className="hover:bg-skin-cream/10 transition">
                       <td className="py-4 px-6 flex items-center gap-3">
                         <div className="w-11 h-11 rounded-xl bg-skin-cream/40 border border-skin-sand/30 overflow-hidden flex-shrink-0">
                           <img
@@ -647,7 +757,7 @@ const AdminProducts = () => {
                         {p.category}
                       </td>
                       <td className="py-4 px-4 font-semibold text-skin-charcoal">
-                        ${p.price?.toFixed(2)}
+                        Rs. {Number(p.price || 0).toFixed(2)}
                       </td>
                       <td className="py-4 px-4">
                         <span
@@ -656,8 +766,28 @@ const AdminProducts = () => {
                           {stockStatus.label}
                         </span>
                       </td>
-                      <td className="py-4 px-4 text-skin-charcoal/70">
-                        ⭐ {p.rating || "5.0"}
+                      <td className="py-4 px-4 text-center">
+                        <button
+                          type="button"
+                          onClick={(e) => handleToggleTopSelling(e, p)}
+                          disabled={isBusy}
+                          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold transition shadow-xs cursor-pointer select-none ${
+                            p.isTopSelling
+                              ? "bg-amber-500/15 text-amber-800 border border-amber-500/35 hover:bg-amber-500/25"
+                              : "bg-skin-cream/30 text-skin-charcoal/45 border border-skin-sand/60 hover:bg-skin-sand/40 hover:text-skin-charcoal"
+                          } ${isBusy ? "opacity-50 cursor-wait" : ""}`}
+                          title={
+                            p.isTopSelling
+                              ? "Selected as Top Selling on Homepage. Click to unselect."
+                              : "Click to select as Top Selling on Homepage"
+                          }
+                        >
+                          <FiStar
+                            size={13}
+                            className={p.isTopSelling ? "fill-amber-500 text-amber-500" : "text-skin-charcoal/40"}
+                          />
+                          <span>{p.isTopSelling ? "Top Selling" : "Select Top"}</span>
+                        </button>
                       </td>
                       <td className="py-4 px-6 text-right space-x-2">
                         <button
@@ -942,7 +1072,7 @@ const AdminProducts = () => {
                   <FiStar className="text-skin-terracotta" />
                   Ratings & Storefront Showcase
                 </h4>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
                   <div className="space-y-1">
                     <label className="text-[10px] uppercase tracking-wider font-bold text-skin-charcoal/60">
                       Rating (0 to 5.0)
@@ -972,20 +1102,43 @@ const AdminProducts = () => {
                       placeholder="1100"
                     />
                   </div>
+                </div>
 
-                  <div className="pt-4 sm:pt-3">
-                    <label className="flex items-center gap-2.5 cursor-pointer select-none bg-skin-cream/20 hover:bg-skin-cream/35 border border-skin-sand/60 rounded-xl px-3.5 py-2.5 transition">
-                      <input
-                        type="checkbox"
-                        checked={form.isFeatured}
-                        onChange={(e) => setForm({ ...form, isFeatured: e.target.checked })}
-                        className="w-4 h-4 rounded text-skin-terracotta focus:ring-skin-terracotta/40 accent-skin-terracotta cursor-pointer"
-                      />
-                      <span className="text-xs font-semibold text-skin-charcoal flex items-center gap-1">
-                        ⭐ Feature Formula
+                {/* Top Selling & Featured Checkboxes */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                  <label className="flex items-start gap-3 cursor-pointer select-none bg-amber-500/10 hover:bg-amber-500/15 border border-amber-500/30 rounded-xl p-3 transition">
+                    <input
+                      type="checkbox"
+                      checked={form.isTopSelling}
+                      onChange={(e) => setForm({ ...form, isTopSelling: e.target.checked })}
+                      className="mt-0.5 w-4 h-4 rounded text-amber-600 focus:ring-amber-500/40 accent-amber-600 cursor-pointer"
+                    />
+                    <div>
+                      <span className="text-xs font-bold text-amber-900 flex items-center gap-1">
+                        ⭐ Top Selling Formula
                       </span>
-                    </label>
-                  </div>
+                      <p className="text-[10px] text-amber-800/70 mt-0.5">
+                        Feature this product in the homepage Top Selling slider section
+                      </p>
+                    </div>
+                  </label>
+
+                  <label className="flex items-start gap-3 cursor-pointer select-none bg-skin-cream/30 hover:bg-skin-cream/50 border border-skin-sand/60 rounded-xl p-3 transition">
+                    <input
+                      type="checkbox"
+                      checked={form.isFeatured}
+                      onChange={(e) => setForm({ ...form, isFeatured: e.target.checked })}
+                      className="mt-0.5 w-4 h-4 rounded text-skin-terracotta focus:ring-skin-terracotta/40 accent-skin-terracotta cursor-pointer"
+                    />
+                    <div>
+                      <span className="text-xs font-bold text-skin-charcoal flex items-center gap-1">
+                        ✨ Featured Formula
+                      </span>
+                      <p className="text-[10px] text-skin-charcoal/60 mt-0.5">
+                        Highlight across store navigation and category recommendations
+                      </p>
+                    </div>
+                  </label>
                 </div>
               </div>
 

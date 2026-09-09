@@ -8,7 +8,18 @@ const api = axios.create({
   },
 });
 
-// Interceptor for handling errors globally
+// Request interceptor: attach token from localStorage for seamless cross-origin auth
+api.interceptors.request.use((config) => {
+  if (typeof window !== "undefined") {
+    const token = localStorage.getItem("skinaura_token");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+  }
+  return config;
+});
+
+// Response interceptor for handling errors globally
 api.interceptors.response.use(
   (response) => response,
   (error) => {

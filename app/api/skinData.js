@@ -17,6 +17,7 @@ export const skincareProducts = [
     rating: 4.8,
     reviewCount: 823,
     isFeatured: true,
+    isTopSelling: true,
     tags: ["hydrating", "gentle", "dry skin"],
     slug: "cerave-hydrating-cleanser",
     description:
@@ -79,6 +80,7 @@ export const skincareProducts = [
     rating: 4.6,
     reviewCount: 2100,
     isFeatured: true,
+    isTopSelling: true,
     tags: ["brightening", "acne reduction"],
     slug: "ordinary-niacinamide-serum",
     description: "Reduces blemishes, controls oil and brightens complexion.",
@@ -109,6 +111,7 @@ export const skincareProducts = [
     rating: 4.9,
     reviewCount: 3500,
     isFeatured: true,
+    isTopSelling: true,
     tags: ["hydrating", "repairing"],
     slug: "cosrx-snail-essence",
     description:
@@ -140,6 +143,7 @@ export const skincareProducts = [
     rating: 4.5,
     reviewCount: 980,
     isFeatured: false,
+    isTopSelling: false,
     tags: ["moisturizing", "sensitive skin"],
     slug: "cetaphil-moisturizing-cream",
     description: "Gentle moisturizing cream for dry and sensitive skin.",
@@ -169,6 +173,7 @@ export const skincareProducts = [
     rating: 4.8,
     reviewCount: 1400,
     isFeatured: true,
+    isTopSelling: true,
     tags: ["hydration", "gel moisturizer"],
     slug: "neutrogena-hydroboost-gel",
     description:

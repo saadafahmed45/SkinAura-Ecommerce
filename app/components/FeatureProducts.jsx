@@ -58,7 +58,7 @@ const FeatureProducts = ({ categoryName }) => {
             </p>
           </div>
 
-          <Link href={`/category/${encodeURIComponent(categoryName)}`}>
+          <Link href={`/product?category=${encodeURIComponent(categoryName)}`}>
             <motion.button
               whileHover={{ x: 4 }}
               className="hidden md:flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] font-bold text-skin-charcoal hover:text-skin-terracotta transition-colors duration-300 group"
@@ -98,7 +98,7 @@ const FeatureProducts = ({ categoryName }) => {
 
         {/* Mobile See More */}
         <div className="flex justify-center mt-10 md:hidden">
-          <Link href={`/category/${encodeURIComponent(categoryName)}`}>
+          <Link href={`/product?category=${encodeURIComponent(categoryName)}`}>
             <button className="flex items-center gap-2.5 px-7 py-3.5 border border-skin-charcoal text-skin-charcoal rounded-2xl text-xs uppercase tracking-widest font-bold hover:bg-skin-charcoal hover:text-white transition-all duration-300">
               View All {categoryName}
               <FiArrowRight size={12} />

@@ -61,6 +61,11 @@ const ProductCard = ({ product }) => {
         {/* Badges */}
         <div className="relative w-full h-64 overflow-hidden bg-skin-cream/40">
           <div className="absolute top-3 left-3 z-10 flex flex-col gap-1.5">
+            {product.isTopSelling && (
+              <span className="bg-amber-600 text-white text-[10px] uppercase tracking-wider font-bold px-2.5 py-1 rounded-lg shadow-sm flex items-center gap-1">
+                ★ Top Seller
+              </span>
+            )}
             {discount > 0 && (
               <span className="bg-skin-terracotta text-white text-[10px] uppercase tracking-wider font-bold px-2.5 py-1 rounded-lg shadow-sm">
                 -{discount}%
@@ -107,11 +112,11 @@ const ProductCard = ({ product }) => {
           {/* Price */}
           <div className="flex items-baseline gap-2">
             <span className="text-md font-bold text-skin-terracotta">
-              ${Number(finalPrice || 0).toFixed(2)}
+              Rs. {Number(finalPrice || 0).toFixed(2)}
             </span>
             {discount > 0 && (
               <span className="text-xs text-skin-charcoal/40 line-through">
-                ${Number(price || 0).toFixed(2)}
+                Rs. {Number(price || 0).toFixed(2)}
               </span>
             )}
           </div>

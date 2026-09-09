@@ -1,6 +1,6 @@
-import Image from "next/image";
 import HeroBanner from "./components/HeroBanner";
-import Category from "./category/page";
+import CategorySection from "./components/CategorySection";
+import TopSellingProducts from "./components/TopSellingProducts";
 import FeatureProducts from "./components/FeatureProducts";
 import OfferMarquee from "./components/OfferMarquee";
 import About from "./components/About";
@@ -11,11 +11,10 @@ export default function Home() {
     <main>
       <HeroBanner />
       <OfferMarquee />
-      <Category />
-      <FeatureProducts categoryId={1} categoryName="Facewash" />
+      <CategorySection />
+      <TopSellingProducts />
       <FeatureProducts categoryId={1} categoryName="Serum" />
       <FeatureProducts categoryId={2} categoryName="Cream" />
-      <FeatureProducts categoryId={3} categoryName="Sunscreen" />
       <About />
       <CtaSection />
     </main>
