@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   FiMenu,
@@ -33,7 +33,7 @@ const TRENDING_SEARCHES = [
   "Gentle Cleanser",
 ];
 
-export default function Header() {
+function HeaderContent() {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
@@ -829,5 +829,13 @@ export default function Header() {
         onClose={() => setTrackOrderOpen(false)}
       />
     </>
+  );
+}
+
+export default function Header() {
+  return (
+    <Suspense fallback={<div className="min-h-[70px] w-full bg-white" />}>
+      <HeaderContent />
+    </Suspense>
   );
 }
