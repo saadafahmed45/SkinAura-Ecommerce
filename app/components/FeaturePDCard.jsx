@@ -9,6 +9,8 @@ import { useCart } from "../context/CartContext";
 const FeaturePDCard = ({ product }) => {
   const {
     id,
+    _id,
+    slug,
     name,
     price,
     discountPrice,
@@ -20,6 +22,12 @@ const FeaturePDCard = ({ product }) => {
     reviewCount,
     inStock,
   } = product;
+
+  const productId = _id || id || slug;
+  const displayImage =
+    images?.[0] ||
+    product.image ||
+    "https://images.pexels.com/photos/3762756/pexels-photo-3762756.jpeg";
 
   const { handleAddedCart } = useCart();
   const [wishlist, setWishlist] = useState(false);
@@ -72,9 +80,9 @@ const FeaturePDCard = ({ product }) => {
         </button>
 
         {/* Image */}
-        <Link href={`/product/${id}`} className="block w-full h-full">
+        <Link href={`/product/${productId}`} className="block w-full h-full">
           <img
-            src={images[0]}
+            src={displayImage}
             alt={name}
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-108"
           />
@@ -91,7 +99,7 @@ const FeaturePDCard = ({ product }) => {
             Add to Cart
           </button>
           <Link
-            href={`/product/${id}`}
+            href={`/product/${productId}`}
             className="w-12 bg-skin-charcoal/90 hover:bg-skin-terracotta text-white flex items-center justify-center transition-colors duration-200"
           >
             <FiEye size={14} />
@@ -109,7 +117,7 @@ const FeaturePDCard = ({ product }) => {
         )}
 
         {/* Name */}
-        <Link href={`/product/${id}`}>
+        <Link href={`/product/${productId}`}>
           <h3 className="text-sm font-serif text-skin-charcoal hover:text-skin-terracotta transition-colors duration-200 line-clamp-2 font-medium leading-snug">
             {name}
           </h3>

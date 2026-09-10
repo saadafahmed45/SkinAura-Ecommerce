@@ -21,10 +21,13 @@ import { HiSparkles } from "react-icons/hi2";
 import { FaStar } from "react-icons/fa";
 import ProductCard from "@/app/components/ProductCard";
 import { useCart } from "@/app/context/CartContext";
+import { skincareProducts } from "@/app/api/skinData";
 import api from "@/app/lib/api";
 
 const ProductDetails = ({ params }) => {
-  const { id } = React.use(params);
+  const resolvedParams =
+    params && typeof params.then === "function" ? React.use(params) : params;
+  const id = resolvedParams?.id;
   const router = useRouter();
   const { handleAddedCart } = useCart();
 
@@ -39,44 +42,107 @@ const ProductDetails = ({ params }) => {
   const [addedSuccess, setAddedSuccess] = useState(false);
 
   useEffect(() => {
+    if (!id) return;
+    let isMounted = true;
+
+    const findFallback = () => {
+      const decodedId = decodeURIComponent(String(id)).trim();
+      return (
+        skincareProducts.find(
+          (sp) =>
+            String(sp.id) === decodedId ||
+            String(sp._id) === decodedId ||
+            sp.slug?.toLowerCase() === decodedId.toLowerCase()
+        ) || null
+      );
+    };
+
+    const applyProduct = async (p) => {
+      const normalized = {
+        ...p,
+        id: p._id || p.id,
+        images:
+          Array.isArray(p.images) && p.images.length > 0
+            ? p.images
+            : [p.image || "https://images.pexels.com/photos/3762756/pexels-photo-3762756.jpeg"],
+      };
+
+      if (!isMounted) return;
+      setProduct(normalized);
+      setSelectedImage(normalized.images[0] || "");
+      setNotFound(false);
+
+      // Fetch or fallback related products
+      if (normalized.category) {
+        try {
+          const relRes = await api.get(
+            `/products?category=${encodeURIComponent(normalized.category)}&limit=6`
+          );
+          const all = relRes.data?.products || relRes.data?.data || [];
+          const filtered = all
+            .filter((rp) => String(rp._id || rp.id) !== String(normalized.id))
+            .slice(0, 4);
+          if (filtered.length > 0 && isMounted) {
+            setRelatedProducts(filtered);
+            return;
+          }
+        } catch {
+          // Ignore API error for related products
+        }
+
+        const fallbackRelated = skincareProducts
+          .filter(
+            (rp) =>
+              rp.category?.toLowerCase() === normalized.category?.toLowerCase() &&
+              String(rp.id) !== String(normalized.id) &&
+              String(rp._id) !== String(normalized.id)
+          )
+          .slice(0, 4);
+
+        if (isMounted) {
+          setRelatedProducts(fallbackRelated);
+        }
+      }
+    };
+
     const fetchProduct = async () => {
       setLoading(true);
+      setNotFound(false);
+
       try {
-        const res = await api.get(`/products/${id}`);
+        const res = await api.get(`/products/${encodeURIComponent(id)}`);
         const p = res.data?.product || res.data?.data;
-        if (!p) {
-          setNotFound(true);
+        if (p) {
+          await applyProduct(p);
           return;
         }
 
-        // Normalize product id
-        const normalized = {
-          ...p,
-          id: p._id || p.id,
-        };
-
-        setProduct(normalized);
-        setSelectedImage(normalized.images?.[0] || "");
-
-        // Fetch related products from the same category
-        if (normalized.category) {
-          const relRes = await api.get(
-            `/products?category=${encodeURIComponent(normalized.category)}&limit=5`
-          );
-          const all = relRes.data?.products || relRes.data?.data || [];
-          setRelatedProducts(
-            all.filter((rp) => (rp._id || rp.id) !== normalized.id).slice(0, 4)
-          );
+        // If backend returned 200 without product data, check fallback
+        const fallback = findFallback();
+        if (fallback) {
+          await applyProduct(fallback);
+        } else if (isMounted) {
+          setNotFound(true);
         }
-      } catch {
-        setNotFound(true);
+      } catch (err) {
+        console.warn("[ProductDetails] API fetch failed, checking fallback:", err);
+        const fallback = findFallback();
+        if (fallback) {
+          await applyProduct(fallback);
+        } else if (isMounted) {
+          setNotFound(true);
+        }
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     };
 
     fetchProduct();
     window.scrollTo({ top: 0, behavior: "smooth" });
+
+    return () => {
+      isMounted = false;
+    };
   }, [id]);
 
   const handleAddToCart = (e) => {

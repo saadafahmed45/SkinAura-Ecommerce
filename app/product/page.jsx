@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import ProductCard from "../components/ProductCard";
+import { skincareProducts } from "../api/skinData";
 import api from "../lib/api";
 import {
   FiSliders,
@@ -120,9 +121,39 @@ function ProductsContent() {
       const data = res.data;
       setProducts(data.products || data.data || []);
       setTotal(data.total || 0);
-      setTotalPages(data.totalPages || 1);
     } catch {
-      setProducts([]);
+      // Fallback to local skincareProducts when API is unreachable on mobile or offline
+      let list = [...skincareProducts];
+      if (selectedCategory && selectedCategory !== "all") {
+        list = list.filter(
+          (p) => p.category?.toLowerCase() === selectedCategory.toLowerCase()
+        );
+      }
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase();
+        list = list.filter(
+          (p) =>
+            p.name?.toLowerCase().includes(q) ||
+            p.brand?.toLowerCase().includes(q) ||
+            p.category?.toLowerCase().includes(q)
+        );
+      }
+      if (minPrice > 0) list = list.filter((p) => (p.price || 0) >= minPrice);
+      if (maxPrice < PRICE_MAX) list = list.filter((p) => (p.price || 0) <= maxPrice);
+      if (selectedRating > 0) list = list.filter((p) => (p.rating || 0) >= selectedRating);
+
+      if (sortOption === "price-low") {
+        list.sort((a, b) => (a.price || 0) - (b.price || 0));
+      } else if (sortOption === "price-high") {
+        list.sort((a, b) => (b.price || 0) - (a.price || 0));
+      } else if (sortOption === "rating") {
+        list.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+      }
+
+      setTotal(list.length);
+      setTotalPages(Math.ceil(list.length / productsPerPage) || 1);
+      const start = (currentPage - 1) * productsPerPage;
+      setProducts(list.slice(start, start + productsPerPage));
     } finally {
       setLoading(false);
     }

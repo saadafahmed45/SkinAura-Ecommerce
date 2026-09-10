@@ -12,6 +12,8 @@ import { useCart } from "../context/CartContext";
 const ProductCard = ({ product }) => {
   const {
     id,
+    _id,
+    slug,
     name,
     price,
     discountPrice,
@@ -23,6 +25,12 @@ const ProductCard = ({ product }) => {
     stock,
     brand,
   } = product;
+
+  const productId = _id || id || slug;
+  const displayImage =
+    images?.[0] ||
+    product.image ||
+    "https://images.pexels.com/photos/3762756/pexels-photo-3762756.jpeg";
 
   const { handleAddedCart } = useCart();
 
@@ -78,9 +86,9 @@ const ProductCard = ({ product }) => {
             )}
           </div>
 
-          <Link href={`/product/${id}`} className="block w-full h-full">
+          <Link href={`/product/${productId}`} className="block w-full h-full">
             <img
-              src={images[0]}
+              src={displayImage}
               alt={name}
               className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
             />
@@ -95,7 +103,7 @@ const ProductCard = ({ product }) => {
           </p>
 
           {/* Product Name */}
-          <Link href={`/product/${id}`} className="block">
+          <Link href={`/product/${productId}`} className="block">
             <h3 className="text-md font-serif text-skin-charcoal hover:text-skin-terracotta transition-colors duration-200 line-clamp-2 min-h-[2.75rem] font-medium leading-snug">
               {name}
             </h3>
