@@ -17,14 +17,18 @@ import { skincareProducts } from "../api/skinData";
 import api from "../lib/api";
 
 const TopSellingProducts = ({
+  initialProducts = null,
   badge = "Customer Favorites",
   title = "Top Selling Formulations",
   subtitle = "Our most-awarded botanical and clinical solutions, proven by glowing reviews and radiant results.",
 }) => {
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [products, setProducts] = useState(initialProducts || []);
+  const [loading, setLoading] = useState(!initialProducts || initialProducts.length === 0);
 
   useEffect(() => {
+    // If server provided products, skip client-side fetch to save roundtrips
+    if (initialProducts && initialProducts.length > 0) return;
+
     let isMounted = true;
     const fetchTopSelling = async () => {
       setLoading(true);
@@ -69,7 +73,7 @@ const TopSellingProducts = ({
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [initialProducts]);
 
   return (
     <section className="py-20 px-5 sm:px-8 md:px-12 lg:px-20 bg-white overflow-hidden">

@@ -16,13 +16,21 @@ import { categories as fallbackCategories } from "../api/categories";
 import api from "../lib/api";
 
 const CategorySection = ({
+  initialCategories = null,
   title = "Shop by Category",
   subtitle = "Formulated solutions designed to address specific skin concerns and elevate your daily ritual.",
   badge = "Curated Collections",
 }) => {
-  const [categoryData, setCategoryData] = useState(fallbackCategories);
+  const [categoryData, setCategoryData] = useState(
+    initialCategories && initialCategories.length > 0
+      ? initialCategories
+      : fallbackCategories
+  );
 
   useEffect(() => {
+    // If server provided categories, skip client-side fetch to save roundtrips
+    if (initialCategories && initialCategories.length > 0) return;
+
     let isMounted = true;
     const fetchCategories = async () => {
       try {
@@ -43,7 +51,7 @@ const CategorySection = ({
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [initialCategories]);
 
   return (
     <section className="px-5 sm:px-8 md:px-12 lg:px-20 py-20 bg-[#FAF7F2]/60 overflow-hidden">

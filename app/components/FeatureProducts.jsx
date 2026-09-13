@@ -7,21 +7,29 @@ import { skincareProducts } from "../api/skinData";
 import { FiArrowRight } from "react-icons/fi";
 import api from "../lib/api";
 
-const FeatureProducts = ({ categoryName }) => {
+const FeatureProducts = ({ categoryName, initialProducts = null }) => {
   const fallback = skincareProducts?.filter(
     (item) => item.category?.toLowerCase() === categoryName?.toLowerCase()
   ) || [];
 
-  const [products, setProducts] = useState(fallback.slice(0, 4));
-  const [loading, setLoading] = useState(true);
+  const [products, setProducts] = useState(
+    initialProducts && initialProducts.length > 0
+      ? initialProducts
+      : fallback.slice(0, 4)
+  );
+  const [loading, setLoading] = useState(!initialProducts || initialProducts.length === 0);
 
   useEffect(() => {
+    // If server provided products, skip client-side fetch to save roundtrips
+    if (initialProducts && initialProducts.length > 0) return;
+
     let isMounted = true;
     const fetchCategoryProducts = async () => {
       try {
         const res = await api.get(`/products?category=${encodeURIComponent(categoryName)}&limit=4`);
-        if (isMounted && res.data?.data && res.data.data.length > 0) {
-          setProducts(res.data.data);
+        const list = res.data?.products || res.data?.data;
+        if (isMounted && list && list.length > 0) {
+          setProducts(list);
         }
       } catch (err) {
         console.warn(`[FeatureProducts] Failed to fetch ${categoryName}, using fallback:`, err.message);
@@ -34,7 +42,7 @@ const FeatureProducts = ({ categoryName }) => {
     return () => {
       isMounted = false;
     };
-  }, [categoryName]);
+  }, [categoryName, initialProducts]);
 
   return (
     <section className="py-20 px-6 md:px-12 lg:px-20 bg-white">

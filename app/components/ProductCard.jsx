@@ -1,6 +1,8 @@
 "use client";
+
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import {
   FaStar,
   FaStarHalfAlt,
@@ -10,6 +12,8 @@ import {
 import { useCart } from "../context/CartContext";
 
 const ProductCard = ({ product }) => {
+  if (!product) return null;
+
   const {
     id,
     _id,
@@ -86,11 +90,14 @@ const ProductCard = ({ product }) => {
             )}
           </div>
 
-          <Link href={`/product/${productId}`} className="block w-full h-full">
-            <img
+          <Link href={`/product/${productId}`} className="block relative w-full h-full">
+            <Image
               src={displayImage}
               alt={name}
-              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+              fill
+              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+              className="object-cover transition-transform duration-700 group-hover:scale-105"
+              loading="lazy"
             />
           </Link>
         </div>

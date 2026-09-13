@@ -1,11 +1,20 @@
-"use client";
-
 import React from "react";
 import Link from "next/link";
 import { HiOutlineSparkles } from "react-icons/hi2";
 import CategorySection from "../components/CategorySection";
+import { getCategories } from "../lib/api/categories";
 
-const CategoryPage = () => {
+export const revalidate = 3600; // Cache categories page for 1 hour
+
+export const metadata = {
+  title: "Skincare Categories | SkinAura",
+  description:
+    "Explore dermatologically formulated botanical solutions curated by skin concern and routine stage.",
+};
+
+export default async function CategoryPage() {
+  const categories = await getCategories();
+
   return (
     <div className="min-h-screen bg-skin-cream/20">
       {/* Category Page Hero */}
@@ -44,13 +53,11 @@ const CategoryPage = () => {
 
       {/* Main Category Section */}
       <CategorySection
+        initialCategories={categories}
         title="Explore All Categories"
         subtitle="Click any category to filter and explore all tailored formulations in our catalog."
         badge="Targeted Skincare"
       />
     </div>
   );
-};
-
-export default CategoryPage;
-
+}
