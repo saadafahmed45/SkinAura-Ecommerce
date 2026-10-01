@@ -1,11 +1,8 @@
 import { categories as fallbackCategories } from "../../api/categories.js";
+import { getApiBaseURL } from "../api";
 
 const getApiBase = () => {
-  return (
-    process.env.INTERNAL_API_URL ||
-    process.env.NEXT_PUBLIC_API_URL ||
-    "http://localhost:5000/api"
-  );
+  return process.env.INTERNAL_API_URL || getApiBaseURL();
 };
 
 /**

@@ -14,6 +14,17 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
+        const token =
+          typeof window !== "undefined"
+            ? localStorage.getItem("skinaura_token")
+            : null;
+
+        if (!token) {
+          setUser(null);
+          setLoading(false);
+          return;
+        }
+
         const res = await api.get("/auth/me");
         if (res.data?.success && res.data?.user) {
           setUser(res.data.user);
@@ -21,6 +32,9 @@ export const AuthProvider = ({ children }) => {
           setUser(null);
         }
       } catch {
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("skinaura_token");
+        }
         setUser(null);
       } finally {
         setLoading(false);

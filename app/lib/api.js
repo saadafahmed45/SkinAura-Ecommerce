@@ -1,53 +1,55 @@
 import axios from "axios";
 
-// Determine appropriate base URL depending on client environment
-const getInitialBaseURL = () => {
-  if (typeof window !== "undefined") {
-    const { hostname } = window.location;
-    const isRemoteDevice =
-      hostname && hostname !== "localhost" && hostname !== "127.0.0.1";
-    const envUrl = process.env.NEXT_PUBLIC_API_URL;
-
-    // If an external production URL is explicitly configured (e.g. https://api.site.com/api)
-    if (envUrl && !envUrl.includes("localhost") && !envUrl.includes("127.0.0.1")) {
-      return envUrl;
-    }
-
-    // On mobile or remote device on LAN, use relative /api (proxied by Next.js to backend)
-    if (isRemoteDevice) {
-      return "/api";
-    }
-
-    return envUrl || "/api";
+// Determine appropriate base URL depending on environment
+export const getApiBaseURL = () => {
+  // 1. Explicitly configured environment variable
+  const envUrl = process.env.NEXT_PUBLIC_API_URL;
+  if (envUrl && !envUrl.includes("localhost") && !envUrl.includes("127.0.0.1")) {
+    return envUrl;
   }
 
-  return process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+  // 2. In browser environment
+  if (typeof window !== "undefined") {
+    const { hostname, protocol } = window.location;
+
+    // Localhost development
+    if (hostname === "localhost" || hostname === "127.0.0.1") {
+      return envUrl || "http://localhost:5000/api";
+    }
+
+    // Local LAN testing on HTTP (e.g. 192.168.x.x, 10.x.x.x)
+    const isLocalNetwork =
+      /^192\.168\./.test(hostname) ||
+      /^10\./.test(hostname) ||
+      /^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(hostname);
+
+    if (isLocalNetwork && protocol === "http:") {
+      return `http://${hostname}:5000/api`;
+    }
+
+    // Production / Vercel deployment (e.g., skin-aura-shop.vercel.app)
+    return "https://skin-aura-server.vercel.app/api";
+  }
+
+  // 3. Server-side rendering fallback
+  if (process.env.NODE_ENV === "production") {
+    return "https://skin-aura-server.vercel.app/api";
+  }
+
+  return envUrl || "http://localhost:5000/api";
 };
 
 const api = axios.create({
-  baseURL: getInitialBaseURL(),
+  baseURL: getApiBaseURL(),
   withCredentials: true,
   headers: {
     "Content-Type": "application/json",
   },
 });
 
-// Request interceptor: attach token and redirect localhost URLs on mobile devices to relative /api
+// Request interceptor: attach token
 api.interceptors.request.use((config) => {
   if (typeof window !== "undefined") {
-    const { hostname } = window.location;
-    const isRemoteDevice =
-      hostname && hostname !== "localhost" && hostname !== "127.0.0.1";
-
-    // Prevent mobile devices from trying to connect to localhost:5000
-    if (
-      isRemoteDevice &&
-      config.baseURL &&
-      (config.baseURL.includes("localhost") || config.baseURL.includes("127.0.0.1"))
-    ) {
-      config.baseURL = "/api";
-    }
-
     const token = localStorage.getItem("skinaura_token");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -56,31 +58,10 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Response interceptor for handling errors globally with automatic fallback
+// Response interceptor for handling errors globally
 api.interceptors.response.use(
   (response) => response,
-  async (error) => {
-    const originalRequest = error.config;
-
-    // If request failed using relative /api on a remote/mobile device, attempt direct port 5000 fallback
-    if (
-      typeof window !== "undefined" &&
-      originalRequest &&
-      !originalRequest._retry &&
-      originalRequest.baseURL === "/api"
-    ) {
-      const { hostname } = window.location;
-      if (hostname && hostname !== "localhost" && hostname !== "127.0.0.1") {
-        originalRequest._retry = true;
-        originalRequest.baseURL = `http://${hostname}:5000/api`;
-        try {
-          return await axios(originalRequest);
-        } catch {
-          // Fall through to reject
-        }
-      }
-    }
-
+  (error) => {
     const message =
       error.response?.data?.message ||
       error.message ||
@@ -90,3 +71,4 @@ api.interceptors.response.use(
 );
 
 export default api;
+

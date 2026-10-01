@@ -73,10 +73,19 @@ const nextConfig = {
     ],
   },
   async rewrites() {
+    const rawTarget =
+      process.env.INTERNAL_API_URL ||
+      process.env.NEXT_PUBLIC_API_URL ||
+      (process.env.NODE_ENV === "production"
+        ? "https://skin-aura-server.vercel.app/api"
+        : "http://localhost:5000/api");
+
+    const destinationBase = rawTarget.replace(/\/api\/?$/, "");
+
     return [
       {
         source: "/api/:path*",
-        destination: "http://localhost:5000/api/:path*",
+        destination: `${destinationBase}/api/:path*`,
       },
     ];
   },
