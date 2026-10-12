@@ -178,6 +178,19 @@ const AdminCategories = () => {
     // Step 2: Smart Client-Side Compression Fallback (< 200KB)
     try {
       const optimizedDataUrl = await compressImage(file, 1200, 0.82);
+
+      // Attempt to store compressed image on Cloudinary via JSON endpoint
+      try {
+        const jsonRes = await api.post("/upload", { images: [optimizedDataUrl] });
+        if (jsonRes.data?.images && jsonRes.data.images.length > 0) {
+          setCategoryImage(jsonRes.data.images[0]);
+          setFeedback({ type: "success", message: "Image uploaded successfully!" });
+          return;
+        }
+      } catch (cloudErr) {
+        console.warn("Cloud fallback upload failed, using local data URL:", cloudErr);
+      }
+
       setCategoryImage(optimizedDataUrl);
       setFeedback({ type: "success", message: "Image optimized & attached successfully!" });
     } catch (err) {

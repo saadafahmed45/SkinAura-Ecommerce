@@ -348,6 +348,22 @@ const AdminProducts = () => {
     try {
       const optimizedPromises = files.map((file) => compressImage(file, 1200, 0.82));
       const dataUrls = await Promise.all(optimizedPromises);
+
+      // Attempt to store compressed images on Cloudinary via JSON endpoint
+      try {
+        const jsonRes = await api.post("/upload", { images: dataUrls });
+        if (jsonRes.data?.images && jsonRes.data.images.length > 0) {
+          setSelectedImages((prev) => [...prev, ...jsonRes.data.images]);
+          setFeedback({
+            type: "success",
+            message: `${jsonRes.data.images.length} image(s) uploaded successfully!`,
+          });
+          return;
+        }
+      } catch (cloudErr) {
+        console.warn("Cloud fallback upload failed, using local data URLs:", cloudErr);
+      }
+
       setSelectedImages((prev) => [...prev, ...dataUrls]);
       setFeedback({
         type: "success",
