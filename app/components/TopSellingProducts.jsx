@@ -5,12 +5,10 @@ import Link from "next/link";
 import { FiArrowRight, FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import { HiOutlineSparkles } from "react-icons/hi2";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Autoplay, Navigation, Pagination } from "swiper/modules";
+import { Autoplay } from "swiper/modules";
 
 // Swiper CSS
 import "swiper/css";
-import "swiper/css/navigation";
-import "swiper/css/pagination";
 
 import ProductCard from "./ProductCard";
 import { skincareProducts } from "../api/skinData";
@@ -22,32 +20,48 @@ const TopSellingProducts = ({
   title = "Top Selling Formulations",
   subtitle = "Our most-awarded botanical and clinical solutions, proven by glowing reviews and radiant results.",
 }) => {
-  const [products, setProducts] = useState(initialProducts || []);
-  const [loading, setLoading] = useState(!initialProducts || initialProducts.length === 0);
+  // Helper to ensure strictly only top-selling products are included
+  const filterTopSelling = (list) => {
+    if (!Array.isArray(list)) return [];
+    return list.filter((p) => Boolean(p.isTopSelling));
+  };
+
+  const initialTopOnly = filterTopSelling(initialProducts);
+  const [products, setProducts] = useState(initialTopOnly);
+  const [loading, setLoading] = useState(
+    !initialProducts || initialTopOnly.length === 0
+  );
+  const [swiperInstance, setSwiperInstance] = useState(null);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [isBeginning, setIsBeginning] = useState(true);
+  const [isEnd, setIsEnd] = useState(false);
 
   useEffect(() => {
-    // If server provided products, skip client-side fetch to save roundtrips
-    if (initialProducts && initialProducts.length > 0) return;
+    // If server provided products and has top-selling products, use them directly
+    const serverTop = filterTopSelling(initialProducts);
+    if (serverTop.length > 0) {
+      setProducts(serverTop);
+      setLoading(false);
+      return;
+    }
 
     let isMounted = true;
     const fetchTopSelling = async () => {
       setLoading(true);
       try {
-        // Fetch top-selling products directly from the API (ordered with isTopSelling first)
-        const res = await api.get("/products?sort=top-selling&limit=12");
+        // Fetch top-selling products directly from the API (filtered by isTopSelling=true)
+        const res = await api.get("/products?isTopSelling=true&sort=top-selling&limit=12");
         const list = res.data?.products || res.data?.data;
-        if (isMounted && list && list.length > 0) {
-          setProducts(list);
+        const validList = filterTopSelling(list);
+
+        if (isMounted && validList.length > 0) {
+          setProducts(validList);
         } else {
-          // Fallback if API returns empty list
-          const fallbackSorted = [...skincareProducts].sort((a, b) => {
-            if (Boolean(b.isTopSelling) !== Boolean(a.isTopSelling)) {
-              return b.isTopSelling ? 1 : -1;
-            }
-            return (
+          // Fallback if API returns empty list (only products with isTopSelling: true)
+          const fallbackSorted = filterTopSelling(skincareProducts).sort(
+            (a, b) =>
               (b.sold || 0) - (a.sold || 0) || (b.rating || 0) - (a.rating || 0)
-            );
-          });
+          );
           if (isMounted) setProducts(fallbackSorted.slice(0, 12));
         }
       } catch (err) {
@@ -55,14 +69,10 @@ const TopSellingProducts = ({
           "[TopSellingProducts] API fetch error, using fallback:",
           err?.message,
         );
-        const fallbackSorted = [...skincareProducts].sort((a, b) => {
-          if (Boolean(b.isTopSelling) !== Boolean(a.isTopSelling)) {
-            return b.isTopSelling ? 1 : -1;
-          }
-          return (
+        const fallbackSorted = filterTopSelling(skincareProducts).sort(
+          (a, b) =>
             (b.sold || 0) - (a.sold || 0) || (b.rating || 0) - (a.rating || 0)
-          );
-        });
+        );
         if (isMounted) setProducts(fallbackSorted.slice(0, 12));
       } finally {
         if (isMounted) setLoading(false);
@@ -74,6 +84,20 @@ const TopSellingProducts = ({
       isMounted = false;
     };
   }, [initialProducts]);
+
+  const handlePrev = () => {
+    if (swiperInstance) {
+      swiperInstance.slidePrev();
+    }
+  };
+
+  const handleNext = () => {
+    if (swiperInstance) {
+      swiperInstance.slideNext();
+    }
+  };
+
+  const canLoop = products.length >= 8;
 
   return (
     <section className="py-20 px-5 sm:px-8 md:px-12 lg:px-20 bg-white overflow-hidden">
@@ -96,7 +120,7 @@ const TopSellingProducts = ({
           {/* Action Links & Swiper Controls */}
           <div className="flex items-center gap-4 self-start md:self-end">
             <Link
-              href="/product?sort=rating"
+              href="/product?sort=top-selling"
               className="hidden sm:inline-flex items-center gap-1.5 text-xs uppercase tracking-[0.18em] font-bold text-skin-charcoal hover:text-skin-terracotta transition-colors group mr-2"
             >
               <span>Explore All</span>
@@ -109,14 +133,20 @@ const TopSellingProducts = ({
             {/* Slider Navigation Buttons */}
             <div className="flex items-center gap-2">
               <button
+                type="button"
+                onClick={handlePrev}
+                disabled={!canLoop && isBeginning}
                 aria-label="Previous Top Selling Slide"
-                className="topselling-prev w-10 h-10 rounded-full border border-skin-sand/90 bg-white hover:bg-skin-terracotta hover:border-skin-terracotta hover:text-white text-skin-charcoal transition-all shadow-xs flex items-center justify-center cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+                className="w-10 h-10 rounded-full border border-skin-sand/90 bg-white hover:bg-skin-terracotta hover:border-skin-terracotta hover:text-white text-skin-charcoal transition-all shadow-xs flex items-center justify-center cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed active:scale-95"
               >
                 <FiChevronLeft size={18} />
               </button>
               <button
+                type="button"
+                onClick={handleNext}
+                disabled={!canLoop && isEnd}
                 aria-label="Next Top Selling Slide"
-                className="topselling-next w-10 h-10 rounded-full border border-skin-sand/90 bg-white hover:bg-skin-terracotta hover:border-skin-terracotta hover:text-white text-skin-charcoal transition-all shadow-xs flex items-center justify-center cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+                className="w-10 h-10 rounded-full border border-skin-sand/90 bg-white hover:bg-skin-terracotta hover:border-skin-terracotta hover:text-white text-skin-charcoal transition-all shadow-xs flex items-center justify-center cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed active:scale-95"
               >
                 <FiChevronRight size={18} />
               </button>
@@ -146,25 +176,24 @@ const TopSellingProducts = ({
         {!loading && products.length > 0 && (
           <div className="relative">
             <Swiper
-              modules={[Navigation, Pagination, Autoplay]}
-              navigation={{
-                prevEl: ".topselling-prev",
-                nextEl: ".topselling-next",
+              modules={[Autoplay]}
+              onSwiper={(swiper) => {
+                setSwiperInstance(swiper);
+                setIsBeginning(swiper.isBeginning);
+                setIsEnd(swiper.isEnd);
               }}
-              pagination={{
-                clickable: true,
-                el: ".topselling-pagination",
-                bulletClass:
-                  "inline-block w-2 h-2 rounded-full bg-skin-charcoal/20 mx-1 cursor-pointer transition-all duration-300",
-                bulletActiveClass: "!w-6 !bg-skin-terracotta",
+              onSlideChange={(swiper) => {
+                setActiveIndex(swiper.realIndex);
+                setIsBeginning(swiper.isBeginning);
+                setIsEnd(swiper.isEnd);
               }}
               autoplay={{
-                delay: 1800,
+                delay: 3200,
                 disableOnInteraction: false,
                 pauseOnMouseEnter: true,
               }}
-              loop={products.length > 4}
-              speed={750}
+              loop={canLoop}
+              speed={650}
               breakpoints={{
                 320: {
                   slidesPerView: 1.25,
@@ -183,7 +212,7 @@ const TopSellingProducts = ({
                   spaceBetween: 24,
                 },
               }}
-              className="w-full pb-10"
+              className="w-full pb-6"
             >
               {products.map((product, idx) => {
                 const key = product._id || product.id || idx;
@@ -197,8 +226,37 @@ const TopSellingProducts = ({
               })}
             </Swiper>
 
-            {/* Dots Pagination */}
-            <div className="topselling-pagination flex items-center justify-center pt-2" />
+            {/* Interactive Controlled Dots Pagination */}
+            <div className="flex items-center justify-center gap-1.5 pt-4">
+              {products.slice(0, Math.min(products.length, 8)).map((_, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => {
+                    if (swiperInstance) {
+                      if (canLoop) {
+                        swiperInstance.slideToLoop(idx);
+                      } else {
+                        swiperInstance.slideTo(idx);
+                      }
+                    }
+                  }}
+                  aria-label={`Go to slide ${idx + 1}`}
+                  className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${
+                    activeIndex === idx
+                      ? "w-7 bg-skin-terracotta shadow-xs"
+                      : "w-2 bg-skin-charcoal/20 hover:bg-skin-charcoal/40"
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Empty state fallback */}
+        {!loading && products.length === 0 && (
+          <div className="text-center py-12 text-skin-charcoal/50 text-sm">
+            No top selling products found at this moment.
           </div>
         )}
       </div>

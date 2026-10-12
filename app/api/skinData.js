@@ -54,9 +54,8 @@ export const skincareProducts = [
     description:
       "A deep-cleansing gel formulated for oily and acne-prone skin. Controls sebum and reduces breakouts.",
     images: [
-      "https://www.laroche-posay.us/dw/image/v2/AANG_PRD/on/demandware.static/-/Sites-acd-laroche-posay-master-catalog/default/dw5a856f03/img/effaclargelcleanser/effaclar-facial-wash-for-oily-skin-3337872411991-1.jpg",
-      "https://www.laroche-posay.us/dw/image/v2/AANG_PRD/on/demandware.static/-/Sites-acd-laroche-posay-master-catalog/default/dwaa34f2c5/img/effaclargelcleanser/007_Updates/LaRochePosay-Product-Effaclar-Effaclar-Foaming-Gel-400ml-3337872411991-Reco-REV.jpg",
-      "https://www.laroche-posay.us/dw/image/v2/AANG_PRD/on/demandware.static/-/Sites-acd-laroche-posay-master-catalog/default/dw9d3d0901/img/effaclargelcleanser/007_Updates/LaRochePosay-Product-EffaclarGelCleanser-routine.jpg",
+      "https://images.pexels.com/photos/3762756/pexels-photo-3762756.jpeg",
+      "https://images.pexels.com/photos/3985360/pexels-photo-3985360.jpeg",
     ],
     createdAt: "2024-03-15",
     updatedAt: "2024-11-20",
@@ -418,8 +417,8 @@ export const skincareProducts = [
     description:
       "High-protection sunscreen with SPF 50+ for sensitive skin. Lightweight and fast-absorbing.",
     images: [
-      "https://www.bioderma.co.uk/sites/uk/files/styles/product_packshot_slider/public/products/%7B157084%7D_%7B%7D_%7B28560F%7D.jpg",
-      "https://www.bioderma.co.uk/sites/uk/files/styles/product_packshot_slider/public/products/%7B83692%7D_%7B%7D_%7B28560F%7D.png",
+      "https://images.pexels.com/photos/3736398/pexels-photo-3736398.jpeg",
+      "https://images.pexels.com/photos/3762756/pexels-photo-3762756.jpeg",
     ],
     createdAt: "2024-07-05",
     updatedAt: "2024-11-30",

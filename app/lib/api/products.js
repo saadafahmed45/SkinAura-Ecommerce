@@ -1,8 +1,21 @@
 import { skincareProducts } from "../../api/skinData.js";
-import { getApiBaseURL } from "../api";
+import { getApiBaseURL } from "../api.js";
 
 const getApiBase = () => {
   return process.env.INTERNAL_API_URL || getApiBaseURL();
+};
+
+const sanitizeProductImageUrl = (url) => {
+  if (!url || typeof url !== "string") {
+    return "https://images.pexels.com/photos/3762756/pexels-photo-3762756.jpeg";
+  }
+  if (url.includes("laroche-posay.us")) {
+    return "https://images.pexels.com/photos/3762756/pexels-photo-3762756.jpeg";
+  }
+  if (url.includes("bioderma.co.uk")) {
+    return "https://images.pexels.com/photos/3736398/pexels-photo-3736398.jpeg";
+  }
+  return url;
 };
 
 /**
@@ -11,18 +24,20 @@ const getApiBase = () => {
 export const normalizeProduct = (p) => {
   if (!p) return null;
   const id = p._id || p.id || p.legacyId;
-  const images =
+  const rawList =
     Array.isArray(p.images) && p.images.length > 0
       ? p.images
       : [
           p.image ||
             "https://images.pexels.com/photos/3762756/pexels-photo-3762756.jpeg",
         ];
+  const images = rawList.map(sanitizeProductImageUrl);
   return {
     ...p,
     id,
     _id: p._id || id,
     images,
+    image: images[0],
   };
 };
 
@@ -107,6 +122,59 @@ const filterFallbackProducts = (params = {}) => {
 /**
  * Fetch products with Next.js App Router Data Caching (revalidate: 300s, tag: "products")
  */
+let isLocalBackendAvailable = null;
+let lastCheckTime = 0;
+
+const checkLocalBackend = async () => {
+  if (typeof window !== "undefined") return true;
+  const now = Date.now();
+  if (isLocalBackendAvailable !== null && now - lastCheckTime < 15000) {
+    return isLocalBackendAvailable;
+  }
+
+  return new Promise((resolve) => {
+    try {
+      const net = require("net");
+      const socket = net.createConnection({ port: 5000, host: "127.0.0.1" });
+      socket.setTimeout(80);
+      socket.on("connect", () => {
+        socket.destroy();
+        isLocalBackendAvailable = true;
+        lastCheckTime = Date.now();
+        resolve(true);
+      });
+      socket.on("error", () => {
+        socket.destroy();
+        isLocalBackendAvailable = false;
+        lastCheckTime = Date.now();
+        resolve(false);
+      });
+      socket.on("timeout", () => {
+        socket.destroy();
+        isLocalBackendAvailable = false;
+        lastCheckTime = Date.now();
+        resolve(false);
+      });
+    } catch {
+      resolve(false);
+    }
+  });
+};
+
+const resolveApiBase = async () => {
+  const base = process.env.INTERNAL_API_URL || getApiBaseURL();
+  if (base.includes("localhost") || base.includes("127.0.0.1")) {
+    const isLive = await checkLocalBackend();
+    if (!isLive) {
+      return "https://skin-aura-server.vercel.app/api";
+    }
+  }
+  return base;
+};
+
+/**
+ * Fetch products with Next.js App Router Data Caching (revalidate: 300s, tag: "products")
+ */
 export async function getProducts(params = {}) {
   const query = new URLSearchParams();
   Object.entries(params).forEach(([key, value]) => {
@@ -115,7 +183,9 @@ export async function getProducts(params = {}) {
     }
   });
 
-  const url = `${getApiBase()}/products${query.toString() ? `?${query.toString()}` : ""}`;
+  const primaryBase = await resolveApiBase();
+  const queryStr = query.toString() ? `?${query.toString()}` : "";
+  const url = `${primaryBase}/products${queryStr}`;
 
   try {
     const res = await fetch(url, {
@@ -125,22 +195,21 @@ export async function getProducts(params = {}) {
       },
     });
 
-    if (!res.ok) {
-      return filterFallbackProducts(params);
+    if (res.ok) {
+      const data = await res.json();
+      const rawList = data.products || data.data || [];
+      return {
+        products: rawList.map(normalizeProduct),
+        total: data.total || rawList.length,
+        totalPages: data.totalPages || 1,
+        currentPage: data.currentPage || 1,
+      };
     }
-
-    const data = await res.json();
-    const rawList = data.products || data.data || [];
-    return {
-      products: rawList.map(normalizeProduct),
-      total: data.total || rawList.length,
-      totalPages: data.totalPages || 1,
-      currentPage: data.currentPage || 1,
-    };
-  } catch (err) {
-    console.warn("[getProducts] Server fetch error, using fallback:", err?.message);
-    return filterFallbackProducts(params);
+  } catch {
+    // If remote fails, fallback gracefully to offline data
   }
+
+  return filterFallbackProducts(params);
 }
 
 /**
@@ -150,7 +219,8 @@ export async function getProductByIdOrSlug(idOrSlug) {
   if (!idOrSlug) return null;
   const cleanId = String(idOrSlug).trim();
 
-  const url = `${getApiBase()}/products/${encodeURIComponent(cleanId)}`;
+  const primaryBase = await resolveApiBase();
+  const url = `${primaryBase}/products/${encodeURIComponent(cleanId)}`;
 
   try {
     const res = await fetch(url, {
@@ -167,8 +237,8 @@ export async function getProductByIdOrSlug(idOrSlug) {
         return normalizeProduct(product);
       }
     }
-  } catch (err) {
-    console.warn(`[getProductByIdOrSlug] Fetch failed for ${cleanId}:`, err?.message);
+  } catch {
+    // Fallback to local catalog
   }
 
   // Fallback to local skincareProducts
@@ -185,9 +255,21 @@ export async function getProductByIdOrSlug(idOrSlug) {
 /**
  * Fetch Top Selling Products for Homepage or Curated carousel
  */
-export async function getTopSellingProducts(limit = 8) {
+export async function getTopSellingProducts(limit = 12) {
   const result = await getProducts({
+    isTopSelling: true,
     sort: "top-selling",
+    limit,
+  });
+  return result.products;
+}
+
+/**
+ * Fetch Featured Formulas for Homepage (strictly filtered by isFeatured: true)
+ */
+export async function getFeaturedFormulas(limit = 8) {
+  const result = await getProducts({
+    isFeatured: true,
     limit,
   });
   return result.products;

@@ -121,6 +121,8 @@ export default function ProductsContentClient({
       if (minPrice > 0) params.set("minPrice", minPrice);
       if (maxPrice < PRICE_MAX) params.set("maxPrice", maxPrice);
       if (selectedRating > 0) params.set("rating", selectedRating);
+      const isFeaturedParam = searchParams.get("isFeatured");
+      if (isFeaturedParam) params.set("isFeatured", isFeaturedParam);
       if (searchQuery.trim()) params.set("search", searchQuery.trim());
       params.set("page", currentPage);
       params.set("limit", productsPerPage);
@@ -133,6 +135,10 @@ export default function ProductsContentClient({
     } catch {
       // Fallback to local skincareProducts when API is unreachable on mobile or offline
       let list = [...skincareProducts];
+      const isFeaturedParam = searchParams.get("isFeatured");
+      if (isFeaturedParam) {
+        list = list.filter((p) => Boolean(p.isFeatured) === (isFeaturedParam === "true"));
+      }
       if (selectedCategory && selectedCategory !== "all") {
         list = list.filter(
           (p) => p.category?.toLowerCase() === selectedCategory.toLowerCase()
@@ -432,8 +438,32 @@ export default function ProductsContentClient({
 
       {/* ── MAIN CONTENT: SIDEBAR + GRID ── */}
       <div className="max-w-7xl mx-auto px-5 sm:px-8 md:px-12 py-10">
+        {/* Category Tabs Strip (Quick 1-click Category Filter) */}
+        <div className="mb-6 overflow-x-auto scrollbar-none pb-1">
+          <div className="flex items-center gap-2 min-w-max">
+            {categories.map((cat) => {
+              const isSelected =
+                selectedCategory?.toLowerCase() === cat?.toLowerCase();
+              return (
+                <button
+                  key={cat}
+                  type="button"
+                  onClick={() => handleCategoryChange(cat)}
+                  className={`px-4 py-2 rounded-xl text-xs font-medium transition-all duration-200 cursor-pointer ${
+                    isSelected
+                      ? "bg-skin-terracotta text-white shadow-xs font-semibold"
+                      : "bg-white border border-skin-sand/60 text-skin-charcoal/70 hover:text-skin-charcoal hover:bg-skin-sand/40"
+                  }`}
+                >
+                  {cat === "all" ? "All Products" : cat}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
         {/* Top Control Bar: Mobile Filter Toggle + Sorting + Layout View */}
-        <div className="flex items-center justify-between gap-4 pb-6 mb-8 border-b border-skin-sand/40">
+        <div className="flex items-center justify-between gap-4 pb-6 mb-8 border-b border-skin-sand/40 flex-wrap">
           <button
             onClick={() => setIsMobileFilterOpen(true)}
             className="lg:hidden inline-flex items-center gap-2 px-3.5 py-2 rounded-xl border border-skin-sand/60 bg-white text-xs font-semibold text-skin-charcoal shadow-xs"
@@ -498,10 +528,33 @@ export default function ProductsContentClient({
             )}
           </div>
 
-          {/* Right: Sort Dropdown + Grid/List Toggle */}
-          <div className="flex items-center gap-3 ml-auto">
+          {/* Right: Category Select + Sort Dropdown + Grid/List Toggle */}
+          <div className="flex items-center gap-3 ml-auto flex-wrap">
+            {/* Category Select Dropdown */}
             <div className="flex items-center gap-2 text-xs text-skin-charcoal/60">
-              <span className="hidden sm:inline">Sort by:</span>
+              <span className="hidden sm:inline">Category:</span>
+              <div className="relative">
+                <select
+                  value={selectedCategory}
+                  onChange={(e) => handleCategoryChange(e.target.value)}
+                  className="appearance-none bg-white border border-skin-sand/60 rounded-xl px-3.5 py-2 pr-8 text-xs text-skin-charcoal font-medium outline-none cursor-pointer hover:border-skin-sand"
+                >
+                  {categories.map((c) => (
+                    <option key={c} value={c}>
+                      {c === "all" ? "All Categories" : c}
+                    </option>
+                  ))}
+                </select>
+                <FiChevronDown
+                  size={13}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-skin-charcoal/40 pointer-events-none"
+                />
+              </div>
+            </div>
+
+            {/* Sort Dropdown */}
+            <div className="flex items-center gap-2 text-xs text-skin-charcoal/60">
+              <span className="hidden sm:inline">Sort:</span>
               <div className="relative">
                 <select
                   value={sortOption}

@@ -25,9 +25,19 @@ export default function ProductDetailsClient({ product, relatedProducts = [] }) 
   const router = useRouter();
   const { handleAddedCart } = useCart();
 
+  const defaultFallback =
+    "https://images.pexels.com/photos/3762756/pexels-photo-3762756.jpeg";
+
+  const getSafeImage = (url) => {
+    if (!url || typeof url !== "string") return defaultFallback;
+    if (url.includes("laroche-posay.us")) return defaultFallback;
+    if (url.includes("bioderma.co.uk"))
+      return "https://images.pexels.com/photos/3736398/pexels-photo-3736398.jpeg";
+    return url;
+  };
+
   const [selectedImage, setSelectedImage] = useState(
-    product?.images?.[0] ||
-      "https://images.pexels.com/photos/3762756/pexels-photo-3762756.jpeg"
+    getSafeImage(product?.images?.[0] || defaultFallback)
   );
   const [quantity, setQuantity] = useState(1);
   const [isWishlisted, setIsWishlisted] = useState(false);
@@ -158,11 +168,12 @@ export default function ProductDetailsClient({ product, relatedProducts = [] }) 
               <div className="relative w-full h-full max-h-[460px]">
                 <Image
                   src={selectedImage}
-                  alt={product.name}
+                  alt={product.name || "Product"}
                   fill
                   priority
                   sizes="(max-width: 1024px) 100vw, 55vw"
                   className="object-contain transition-transform duration-700 ease-out group-hover:scale-105"
+                  onError={() => setSelectedImage(defaultFallback)}
                 />
               </div>
             </div>
@@ -170,7 +181,8 @@ export default function ProductDetailsClient({ product, relatedProducts = [] }) 
             {/* Thumbnail Gallery Row */}
             {product.images?.length > 1 && (
               <div className="flex items-center gap-3 overflow-x-auto pb-1 pt-1 scrollbar-none">
-                {product.images.map((img, i) => {
+                {product.images.map((rawImg, i) => {
+                  const img = getSafeImage(rawImg);
                   const isSelected = selectedImage === img;
                   return (
                     <button

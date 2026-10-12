@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { FaStar, FaRegStar, FaHeart } from "react-icons/fa";
@@ -27,10 +27,23 @@ const FeaturePDCard = ({ product }) => {
   } = product;
 
   const productId = _id || id || slug;
-  const displayImage =
-    images?.[0] ||
-    product.image ||
+  const defaultFallback =
     "https://images.pexels.com/photos/3762756/pexels-photo-3762756.jpeg";
+
+  const getSafeImage = (url) => {
+    if (!url || typeof url !== "string") return defaultFallback;
+    if (url.includes("laroche-posay.us")) return defaultFallback;
+    if (url.includes("bioderma.co.uk"))
+      return "https://images.pexels.com/photos/3736398/pexels-photo-3736398.jpeg";
+    return url;
+  };
+
+  const displayImage = getSafeImage(images?.[0] || product.image || defaultFallback);
+  const [imgSrc, setImgSrc] = useState(displayImage);
+
+  useEffect(() => {
+    setImgSrc(getSafeImage(images?.[0] || product.image || defaultFallback));
+  }, [images, product.image]);
 
   const { handleAddedCart } = useCart();
   const [wishlist, setWishlist] = useState(false);
@@ -85,12 +98,13 @@ const FeaturePDCard = ({ product }) => {
         {/* Image */}
         <Link href={`/product/${productId}`} className="block relative w-full h-full">
           <Image
-            src={displayImage}
-            alt={name}
+            src={imgSrc}
+            alt={name || "Product"}
             fill
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
             className="object-cover transition-transform duration-700 group-hover:scale-108"
             loading="lazy"
+            onError={() => setImgSrc(defaultFallback)}
           />
         </Link>
 

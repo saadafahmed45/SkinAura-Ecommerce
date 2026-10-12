@@ -1,6 +1,8 @@
 import { revalidateTag, revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 
+export const dynamic = "force-dynamic";
+
 /**
  * On-demand cache revalidation endpoint
  * Call via POST or GET with ?tag=products or ?path=/product

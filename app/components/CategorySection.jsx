@@ -155,8 +155,12 @@ const CategorySection = ({
                   <div className="group relative h-72 sm:h-80 w-full rounded-2xl overflow-hidden border border-skin-sand/50 bg-white shadow-xs hover:shadow-xl hover:border-skin-terracotta/40 transition-all duration-500 flex flex-col justify-end">
                     {/* Background Image */}
                     <img
-                      src={image}
+                      src={image || "https://images.pexels.com/photos/3762756/pexels-photo-3762756.jpeg"}
                       alt={name}
+                      onError={(e) => {
+                        e.currentTarget.src =
+                          "https://images.pexels.com/photos/3762756/pexels-photo-3762756.jpeg";
+                      }}
                       className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-108"
                       loading="lazy"
                     />

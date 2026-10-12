@@ -1,5 +1,5 @@
 import { categories as fallbackCategories } from "../../api/categories.js";
-import { getApiBaseURL } from "../api";
+import { getApiBaseURL } from "../api.js";
 
 const getApiBase = () => {
   return process.env.INTERNAL_API_URL || getApiBaseURL();
@@ -23,11 +23,62 @@ export const normalizeCategory = (cat) => {
   };
 };
 
+let isLocalBackendAvailable = null;
+let lastCheckTime = 0;
+
+const checkLocalBackend = async () => {
+  if (typeof window !== "undefined") return true;
+  const now = Date.now();
+  if (isLocalBackendAvailable !== null && now - lastCheckTime < 15000) {
+    return isLocalBackendAvailable;
+  }
+
+  return new Promise((resolve) => {
+    try {
+      const net = require("net");
+      const socket = net.createConnection({ port: 5000, host: "127.0.0.1" });
+      socket.setTimeout(80);
+      socket.on("connect", () => {
+        socket.destroy();
+        isLocalBackendAvailable = true;
+        lastCheckTime = Date.now();
+        resolve(true);
+      });
+      socket.on("error", () => {
+        socket.destroy();
+        isLocalBackendAvailable = false;
+        lastCheckTime = Date.now();
+        resolve(false);
+      });
+      socket.on("timeout", () => {
+        socket.destroy();
+        isLocalBackendAvailable = false;
+        lastCheckTime = Date.now();
+        resolve(false);
+      });
+    } catch {
+      resolve(false);
+    }
+  });
+};
+
+const resolveApiBase = async () => {
+  const base = process.env.INTERNAL_API_URL || getApiBaseURL();
+  if (base.includes("localhost") || base.includes("127.0.0.1")) {
+    const isLive = await checkLocalBackend();
+    if (!isLive) {
+      return "https://skin-aura-server.vercel.app/api";
+    }
+  }
+  return base;
+};
+
 /**
  * Fetch all categories with Next.js Data Caching (revalidate: 3600s, tag: "categories")
  */
 export async function getCategories() {
-  const url = `${getApiBase()}/categories`;
+  const primaryBase = await resolveApiBase();
+  const url = `${primaryBase}/categories`;
 
   try {
     const res = await fetch(url, {
@@ -44,8 +95,8 @@ export async function getCategories() {
         return list.map(normalizeCategory);
       }
     }
-  } catch (err) {
-    console.warn("[getCategories] Server fetch error, using fallback:", err?.message);
+  } catch {
+    // Fallback to local categories
   }
 
   return fallbackCategories.map(normalizeCategory);
@@ -58,7 +109,8 @@ export async function getCategoryByIdOrSlug(idOrSlug) {
   if (!idOrSlug) return null;
   const cleanId = String(idOrSlug).trim();
 
-  const url = `${getApiBase()}/categories/${encodeURIComponent(cleanId)}`;
+  const primaryBase = await resolveApiBase();
+  const url = `${primaryBase}/categories/${encodeURIComponent(cleanId)}`;
 
   try {
     const res = await fetch(url, {
@@ -73,8 +125,8 @@ export async function getCategoryByIdOrSlug(idOrSlug) {
       const cat = data.category || data.data;
       if (cat) return normalizeCategory(cat);
     }
-  } catch (err) {
-    console.warn(`[getCategoryByIdOrSlug] Fetch failed for ${cleanId}:`, err?.message);
+  } catch {
+    // Fallback to local category
   }
 
   const fallback = fallbackCategories.find(
