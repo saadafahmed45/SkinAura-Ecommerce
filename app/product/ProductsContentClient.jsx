@@ -412,32 +412,83 @@ export default function ProductsContentClient({
 
   return (
     <div className="min-h-screen bg-[#FCFAF7]">
-      {/* ── HEADER HERO STRIP ── */}
-      <div className="bg-skin-charcoal text-white pt-28 pb-12 px-5 sm:px-8 md:px-12 border-b border-white/10">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-end justify-between gap-6">
-          <div className="space-y-2">
-            <span className="text-[10px] uppercase tracking-[0.25em] text-skin-terracotta font-bold">
-              The Formulation Archive
-            </span>
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-serif font-medium">
-              {selectedCategory && selectedCategory !== "all"
-                ? `${selectedCategory} Collection`
-                : "All Formulations"}
-            </h1>
-            <p className="text-xs sm:text-sm text-white/60 font-light max-w-md">
-              Evidence-based skincare targeted to protect, nourish, and visibly renew every complexion.
-            </p>
-          </div>
+      {/* ── MINIMALIST LUXURY CATALOG HEADER ── */}
+      <div className="bg-[#FAF7F2] border-b border-skin-sand/60 pt-28 pb-10 sm:pb-12 px-5 sm:px-8 md:px-12">
+        <div className="max-w-7xl mx-auto space-y-5">
+          {/* Breadcrumb Navigation */}
+          <nav
+            aria-label="Breadcrumb"
+            className="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-skin-charcoal/45"
+          >
+            <Link
+              href="/"
+              className="hover:text-skin-terracotta transition-colors"
+            >
+              Home
+            </Link>
+            <span className="text-skin-charcoal/25">/</span>
+            <Link
+              href="/product"
+              onClick={() => handleCategoryChange("all")}
+              className={`hover:text-skin-terracotta transition-colors ${
+                !isCategoryActive ? "text-skin-charcoal font-semibold" : ""
+              }`}
+            >
+              Shop
+            </Link>
+            {isCategoryActive && (
+              <>
+                <span className="text-skin-charcoal/25">/</span>
+                <span className="text-skin-charcoal font-semibold">
+                  {selectedCategory}
+                </span>
+              </>
+            )}
+          </nav>
 
-          <div className="text-xs text-white/50">
-            Showing <strong className="text-white font-medium">{products.length}</strong> of{" "}
-            <strong className="text-white font-medium">{total}</strong> products
+          {/* Title + Meta Row */}
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <div className="space-y-2 max-w-xl">
+              <div className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.25em] text-skin-terracotta">
+                <span className="w-5 h-px bg-skin-terracotta inline-block" />
+                <span>The Formulation Archive</span>
+              </div>
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-serif text-skin-charcoal font-normal tracking-tight">
+                {selectedCategory && selectedCategory !== "all" ? (
+                  <>
+                    <span>{selectedCategory}</span>
+                    <span className="italic font-light text-skin-charcoal/60 ml-2.5">
+                      Collection
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <span>All</span>
+                    <span className="italic font-light text-skin-charcoal/60 ml-2.5">
+                      Formulations
+                    </span>
+                  </>
+                )}
+              </h1>
+              <p className="text-xs sm:text-sm text-skin-charcoal/60 font-light max-w-lg leading-relaxed">
+                Evidence-based botanical and clinical skincare targeted to protect, nourish, and visibly renew every complexion.
+              </p>
+            </div>
+
+            {/* Product Count Pill */}
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white border border-skin-sand/80 shadow-2xs text-xs text-skin-charcoal/65 self-start md:self-end">
+              <span className="w-2 h-2 rounded-full bg-skin-terracotta animate-pulse" />
+              <span>
+                Showing <strong className="text-skin-charcoal font-semibold">{products.length}</strong> of{" "}
+                <strong className="text-skin-charcoal font-semibold">{total}</strong> formulations
+              </span>
+            </div>
           </div>
         </div>
       </div>
 
       {/* ── MAIN CONTENT: SIDEBAR + GRID ── */}
-      <div className="max-w-7xl mx-auto px-5 sm:px-8 md:px-12 py-10">
+      <div className="max-w-7xl mx-auto px-5 sm:px-8 md:px-12 py-8 sm:py-10">
         {/* Category Tabs Strip (Quick 1-click Category Filter) */}
         <div className="mb-6 overflow-x-auto scrollbar-none pb-1">
           <div className="flex items-center gap-2 min-w-max">
@@ -449,10 +500,10 @@ export default function ProductsContentClient({
                   key={cat}
                   type="button"
                   onClick={() => handleCategoryChange(cat)}
-                  className={`px-4 py-2 rounded-xl text-xs font-medium transition-all duration-200 cursor-pointer ${
+                  className={`px-4 py-1.5 rounded-full text-xs font-medium transition-all duration-200 cursor-pointer ${
                     isSelected
-                      ? "bg-skin-terracotta text-white shadow-xs font-semibold"
-                      : "bg-white border border-skin-sand/60 text-skin-charcoal/70 hover:text-skin-charcoal hover:bg-skin-sand/40"
+                      ? "bg-skin-charcoal text-white border border-skin-charcoal shadow-xs font-semibold"
+                      : "bg-white border border-skin-sand/80 text-skin-charcoal/65 hover:text-skin-charcoal hover:border-skin-charcoal/30 shadow-2xs"
                   }`}
                 >
                   {cat === "all" ? "All Products" : cat}
