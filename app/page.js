@@ -1,6 +1,7 @@
 import HeroBanner from "./components/HeroBanner";
 import CategorySection from "./components/CategorySection";
 import TopSellingProducts from "./components/TopSellingProducts";
+import WinterCollection from "./components/WinterCollection";
 import FeaturedFormulas from "./components/FeaturedFormulas";
 import FeatureProducts from "./components/FeatureProducts";
 import OfferMarquee from "./components/OfferMarquee";
@@ -11,20 +12,28 @@ import {
   getTopSellingProducts,
   getFeaturedFormulas,
   getFeaturedProducts,
+  getWinterCollectionProducts,
 } from "./lib/api/products";
 
 export const revalidate = 300; // Cache homepage for 5 minutes
 
 export default async function Home() {
   // Fetch initial homepage data concurrently on the server
-  const [categories, topSelling, featuredFormulas, serumProducts, creamProducts] =
-    await Promise.all([
-      getCategories(),
-      getTopSellingProducts(12),
-      getFeaturedFormulas(8),
-      getFeaturedProducts("Serum", 4),
-      getFeaturedProducts("Cream", 4),
-    ]);
+  const [
+    categories,
+    topSelling,
+    winterProducts,
+    featuredFormulas,
+    serumProducts,
+    creamProducts,
+  ] = await Promise.all([
+    getCategories(),
+    getTopSellingProducts(12),
+    getWinterCollectionProducts(8),
+    getFeaturedFormulas(8),
+    getFeaturedProducts("Serum", 4),
+    getFeaturedProducts("Cream", 4),
+  ]);
 
   return (
     <main>
@@ -32,6 +41,7 @@ export default async function Home() {
       <OfferMarquee />
       <CategorySection initialCategories={categories} />
       <TopSellingProducts initialProducts={topSelling} />
+      <WinterCollection initialProducts={winterProducts} />
       <FeaturedFormulas initialProducts={featuredFormulas} />
       <FeatureProducts
         categoryId={1}

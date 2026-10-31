@@ -108,7 +108,7 @@ const FeaturedFormulas = ({
 
         {/* ── LOADING SKELETON ── */}
         {loading && (
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 md:gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5 sm:gap-5 md:gap-6">
             {[...Array(4)].map((_, i) => (
               <div
                 key={i}
@@ -126,7 +126,7 @@ const FeaturedFormulas = ({
 
         {/* ── FEATURED PRODUCTS GRID ── */}
         {!loading && products.length > 0 && (
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 md:gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5 sm:gap-5 md:gap-6">
             {products.map((product, idx) => {
               const key = product._id || product.id || idx;
               return (

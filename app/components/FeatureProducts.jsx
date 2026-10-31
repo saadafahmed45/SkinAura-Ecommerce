@@ -84,7 +84,7 @@ const FeatureProducts = ({ categoryName, initialProducts = null }) => {
         <div className="h-px bg-gradient-to-r from-skin-sand via-skin-terracotta/20 to-transparent mb-12" />
 
         {/* Product Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 md:gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5 sm:gap-5 md:gap-6">
           {products.slice(0, 4).map((product, i) => (
             <motion.div
               key={product._id || product.id || i}

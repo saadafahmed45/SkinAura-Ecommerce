@@ -18,7 +18,7 @@ export const skincareProducts = [
     reviewCount: 823,
     isFeatured: true,
     isTopSelling: true,
-    tags: ["hydrating", "gentle", "dry skin"],
+    tags: ["hydrating", "gentle", "dry skin", "winter"],
     slug: "cerave-hydrating-cleanser",
     description:
       "A gentle hydrating cleanser with ceramides and hyaluronic acid. Best for dry and sensitive skin.",
@@ -111,7 +111,7 @@ export const skincareProducts = [
     reviewCount: 3500,
     isFeatured: true,
     isTopSelling: true,
-    tags: ["hydrating", "repairing"],
+    tags: ["hydrating", "repairing", "winter"],
     slug: "cosrx-snail-essence",
     description:
       "Deeply hydrating snail mucin serum that repairs and smooths skin.",
@@ -143,7 +143,7 @@ export const skincareProducts = [
     reviewCount: 980,
     isFeatured: false,
     isTopSelling: false,
-    tags: ["moisturizing", "sensitive skin"],
+    tags: ["moisturizing", "sensitive skin", "winter"],
     slug: "cetaphil-moisturizing-cream",
     description: "Gentle moisturizing cream for dry and sensitive skin.",
     images: [
@@ -173,7 +173,7 @@ export const skincareProducts = [
     reviewCount: 1400,
     isFeatured: true,
     isTopSelling: true,
-    tags: ["hydration", "gel moisturizer"],
+    tags: ["hydration", "gel moisturizer", "winter"],
     slug: "neutrogena-hydroboost-gel",
     description:
       "Lightweight gel moisturizer with hyaluronic acid for long-lasting hydration.",
@@ -234,7 +234,7 @@ export const skincareProducts = [
     rating: 4.7,
     reviewCount: 720,
     isFeatured: false,
-    tags: ["gentle", "moisturizing"],
+    tags: ["gentle", "moisturizing", "winter"],
     slug: "bioderma-atoderm-gel",
     description: "Gentle foaming gel for dry and sensitive skin.",
     images: [
@@ -263,7 +263,7 @@ export const skincareProducts = [
     rating: 4.6,
     reviewCount: 1550,
     isFeatured: true,
-    tags: ["anti-aging", "firming"],
+    tags: ["anti-aging", "firming", "winter"],
     slug: "olay-regenerist-cream",
     description:
       "Anti-aging moisturizer that hydrates, firms, and rejuvenates skin.",
@@ -384,7 +384,7 @@ export const skincareProducts = [
     rating: 4.6,
     reviewCount: 750,
     isFeatured: false,
-    tags: ["spf50", "hydrating", "mineral sunscreen"],
+    tags: ["spf50", "hydrating", "mineral sunscreen", "winter"],
     slug: "cerave-hydrating-mineral-spf50",
     description:
       "Mineral sunscreen with SPF 50. Hydrating formula suitable for dry and sensitive skin.",
@@ -441,7 +441,7 @@ export const skincareProducts = [
     rating: 4.8,
     reviewCount: 1200,
     isFeatured: true,
-    tags: ["anti-aging", "hydrating", "night cream"],
+    tags: ["anti-aging", "hydrating", "night cream", "winter"],
     slug: "olay-regenerist-night-cream",
     description:
       "Deeply hydrating night cream that reduces wrinkles and firms skin overnight.",
@@ -471,7 +471,7 @@ export const skincareProducts = [
     rating: 4.8,
     reviewCount: 900,
     isFeatured: true,
-    tags: ["anti-aging", "night cream", "firming"],
+    tags: ["anti-aging", "night cream", "firming", "winter"],
     slug: "loreal-revitalift-night",
     description:
       "Intensive anti-aging night cream with Pro-Retinol to reduce wrinkles and firm skin.",
@@ -501,7 +501,7 @@ export const skincareProducts = [
     rating: 4.8,
     reviewCount: 900,
     isFeatured: true,
-    tags: ["soothing", "repairing", "serum"],
+    tags: ["soothing", "repairing", "serum", "winter"],
     slug: "skin1004-centella-ampoule",
     description:
       "Repairing serum enriched with Centella Asiatica for calm, healthy skin.",
@@ -530,7 +530,7 @@ export const skincareProducts = [
     rating: 4.8,
     reviewCount: 2200,
     isFeatured: true,
-    tags: ["gentle", "soothing", "daily cleanser"],
+    tags: ["gentle", "soothing", "daily cleanser", "winter"],
     slug: "cetaphil-gentle-skin-cleanser",
     description:
       "Mild, non-irritating cleanser suitable for all skin types including sensitive skin.",
@@ -562,6 +562,7 @@ export const skincareProducts = [
     isFeatured: true,
     tags: ["gentle", "acne control", "low ph"],
     slug: "cosrx-low-ph-cleanser",
+
     description:
       "Gentle gel cleanser with low pH for morning use, suitable for acne-prone skin.",
     images: [
@@ -572,8 +573,65 @@ export const skincareProducts = [
     createdAt: "2024-03-15",
     updatedAt: "2024-11-30",
   },
+  {
+    id: 20,
+    name: "La Roche-Posay Cicaplast Baume B5+ Ultra-Repairing",
+    category: "Cream",
+    subcategory: "Barrier Repair",
+    brand: "La Roche-Posay",
+    price: 18.99,
+    discountPrice: 16.49,
+    discount: 13,
+    stock: 95,
+    inStock: true,
+    sold: 1420,
+    size: "100ml",
+    skinType: ["Dry", "Sensitive", "Damaged"],
+    ingredients: ["Madecassoside", "Panthenol 5%", "Shea Butter"],
+    rating: 4.9,
+    reviewCount: 3120,
+    isFeatured: true,
+    isTopSelling: true,
+    tags: ["winter", "barrier repair", "soothing", "dry skin"],
+    slug: "la-roche-posay-cicaplast-baume-b5",
+    description: "Intensive soothing and barrier-restoring balm with 5% Panthenol and Shea Butter. Shields dry, irritated skin against freezing winds.",
+    images: [
+      "https://images.pexels.com/photos/3762756/pexels-photo-3762756.jpeg",
+      "https://images.pexels.com/photos/3736398/pexels-photo-3736398.jpeg"
+    ],
+    createdAt: "2024-09-01",
+    updatedAt: "2024-11-30"
+  },
+  {
+    id: 21,
+    name: "The Ordinary 100% Organic Cold-Pressed Rose Hip Seed Oil",
+    category: "Serum",
+    subcategory: "Facial Oil",
+    brand: "The Ordinary",
+    price: 11.99,
+    discountPrice: 9.99,
+    discount: 16,
+    stock: 110,
+    inStock: true,
+    sold: 1890,
+    size: "30ml",
+    skinType: ["Dry", "Normal", "Mature"],
+    ingredients: ["Rosa Canina Seed Oil", "Vitamin E"],
+    rating: 4.8,
+    reviewCount: 2450,
+    isFeatured: true,
+    isTopSelling: true,
+    tags: ["winter", "facial oil", "deep hydration", "glow"],
+    slug: "ordinary-rose-hip-seed-oil",
+    description: "Pure organic cold-pressed oil that delivers essential fatty acids and antioxidant vitamins to quench winter dryness and restore radiant dewiness.",
+    images: [
+      "https://theordinary.com/dw/image/v2/BFKJ_PRD/on/demandware.static/-/Sites-deciem-master/default/dwdf7a6213/Images/products/The%20Ordinary/rdn-aha-30pct-bha-2pct-peeling-solution-30ml.png",
+      "https://images.pexels.com/photos/3762756/pexels-photo-3762756.jpeg"
+    ],
+    createdAt: "2024-08-15",
+    updatedAt: "2024-11-30"
+  }
 ];
-
 // export const categories = [
 //   ...new Set(skincareProducts.map((item) => item.category)),
 // ];

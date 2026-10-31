@@ -48,6 +48,8 @@ const filterFallbackProducts = (params = {}) => {
   let list = [...skincareProducts];
   const {
     category,
+    tag,
+    skinType,
     sort,
     minPrice,
     maxPrice,
@@ -62,6 +64,17 @@ const filterFallbackProducts = (params = {}) => {
   if (category && category !== "all") {
     list = list.filter(
       (p) => p.category?.toLowerCase() === category.toLowerCase()
+    );
+  }
+  if (tag) {
+    list = list.filter((p) =>
+      Array.isArray(p.tags) && p.tags.some((t) => t.toLowerCase() === tag.toLowerCase())
+    );
+  }
+  if (skinType) {
+    list = list.filter((p) =>
+      Array.isArray(p.skinType) &&
+      p.skinType.some((st) => st.toLowerCase().includes(skinType.toLowerCase()))
     );
   }
   if (search && search.trim()) {
@@ -300,4 +313,36 @@ export async function getRelatedProducts(category, currentProductId, limit = 4) 
   return result.products
     .filter((p) => String(p.id) !== String(currentProductId) && String(p._id) !== String(currentProductId))
     .slice(0, limit);
+}
+
+/**
+ * Fetch Winter Collection Products for Homepage
+ */
+export async function getWinterCollectionProducts(limit = 8) {
+  // First attempt: fetch items tagged 'winter'
+  const result = await getProducts({
+    tag: "winter",
+    limit: 16,
+  });
+
+  if (result.products && result.products.length >= 4) {
+    return result.products.slice(0, limit);
+  }
+
+  // Graceful fallback: collect rich hydrating, moisturizing, and barrier products
+  const winterKeywords = ["winter", "hydrat", "moistur", "barrier", "repair", "dry", "cream", "night"];
+  const filtered = skincareProducts.filter((p) => {
+    const text = [
+      p.name,
+      p.category,
+      p.subcategory,
+      p.description,
+      ...(p.tags || []),
+      ...(p.skinType || []),
+      ...(p.ingredients || []),
+    ].join(" ").toLowerCase();
+    return winterKeywords.some((kw) => text.includes(kw));
+  });
+
+  return (filtered.length > 0 ? filtered : skincareProducts).slice(0, limit).map(normalizeProduct);
 }

@@ -63,24 +63,24 @@ const FeaturePDCard = ({ product }) => {
   };
 
   return (
-    <div className="group bg-white rounded-2xl border border-skin-sand/60 hover:border-skin-terracotta/40 hover:shadow-xl hover:shadow-skin-terracotta/8 transition-all duration-400 flex flex-col justify-between overflow-hidden h-full">
-      <div>
-        {/* IMAGE AREA - Seamless Pure White Canvas */}
-        <div className="relative aspect-square w-full overflow-hidden bg-white p-4 sm:p-5 flex items-center justify-center border-b border-skin-sand/35">
+    <div className="group bg-white rounded-2xl border border-skin-sand/70 hover:border-skin-terracotta/40 hover:shadow-xl hover:shadow-skin-terracotta/10 transition-all duration-300 flex flex-col justify-between overflow-hidden h-full">
+      <div className="flex flex-col flex-1">
+        {/* IMAGE AREA - Clean Responsive Canvas */}
+        <div className="relative aspect-square w-full overflow-hidden bg-white p-3 sm:p-4 flex items-center justify-center border-b border-skin-sand/35">
           {/* Badges */}
-          <div className="absolute top-3 left-3 z-10 flex flex-wrap items-center gap-1.5 pointer-events-none">
+          <div className="absolute top-2.5 left-2.5 z-10 flex flex-wrap items-center gap-1 pointer-events-none max-w-[70%]">
             {discount > 0 && (
-              <span className="bg-skin-terracotta text-white text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full shadow-xs">
+              <span className="bg-skin-terracotta text-white text-[9px] sm:text-[9.5px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full shadow-xs">
                 -{discount}%
               </span>
             )}
             {isNew && (
-              <span className="bg-skin-charcoal text-white text-[9.5px] font-semibold uppercase tracking-wider px-2.5 py-0.5 rounded-full shadow-xs">
+              <span className="bg-skin-charcoal text-white text-[8.5px] sm:text-[9px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full shadow-xs">
                 New
               </span>
             )}
             {inStock === false && (
-              <span className="bg-skin-charcoal/80 text-white text-[9.5px] font-semibold uppercase tracking-wider px-2.5 py-0.5 rounded-full shadow-xs">
+              <span className="bg-skin-charcoal/80 text-white text-[8.5px] sm:text-[9px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full shadow-xs">
                 Sold Out
               </span>
             )}
@@ -95,10 +95,10 @@ const FeaturePDCard = ({ product }) => {
               setWishlist(!wishlist);
             }}
             aria-label={wishlist ? "Remove from wishlist" : "Add to wishlist"}
-            className={`absolute top-3 right-3 z-10 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 shadow-xs cursor-pointer ${
+            className={`absolute top-2.5 right-2.5 z-10 w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center transition-all duration-300 shadow-xs cursor-pointer ${
               wishlist
                 ? "bg-skin-terracotta text-white"
-                : "bg-skin-sand/50 hover:bg-white text-skin-charcoal/45 hover:text-skin-terracotta"
+                : "bg-skin-sand/60 hover:bg-white text-skin-charcoal/50 hover:text-skin-terracotta"
             }`}
           >
             <FiHeart
@@ -129,39 +129,41 @@ const FeaturePDCard = ({ product }) => {
         </div>
 
         {/* CONTENT */}
-        <div className="p-4 pt-3.5 space-y-2">
-          {/* Brand & Rating Header Line */}
-          <div className="flex items-center justify-between text-[10px] uppercase tracking-[0.2em] font-bold">
-            <span className="text-skin-terracotta truncate max-w-[65%]">
-              {brand || "Botanical"}
-            </span>
-            {rating > 0 && (
-              <div className="flex items-center gap-1 text-skin-charcoal/70 font-semibold normal-case tracking-normal text-xs shrink-0">
-                <FaStar className="text-amber-400 text-[10px]" />
-                <span>{Number(rating).toFixed(1)}</span>
-                {reviewCount > 0 && (
-                  <span className="text-skin-charcoal/40 font-light text-[10px]">
-                    ({reviewCount})
-                  </span>
-                )}
-              </div>
-            )}
+        <div className="p-3 sm:p-4 pt-2.5 sm:pt-3 space-y-1.5 sm:space-y-2 flex-1 flex flex-col justify-between">
+          <div>
+            {/* Brand & Rating Header Line */}
+            <div className="flex items-center justify-between text-[10px] sm:text-[10.5px] uppercase tracking-wider font-bold mb-1">
+              <span className="text-skin-terracotta truncate max-w-[60%]">
+                {brand || "Botanical"}
+              </span>
+              {rating > 0 && (
+                <div className="flex items-center gap-1 text-skin-charcoal/70 font-semibold normal-case tracking-normal text-xs shrink-0">
+                  <FaStar className="text-amber-400 text-[10px]" />
+                  <span>{Number(rating).toFixed(1)}</span>
+                  {reviewCount > 0 && (
+                    <span className="text-skin-charcoal/40 font-light text-[10px]">
+                      ({reviewCount})
+                    </span>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Product Name */}
+            <Link href={`/product/${productId}`} className="block group/title">
+              <h3 className="text-[13.5px] sm:text-[14.5px] font-serif text-skin-charcoal group-hover/title:text-skin-terracotta transition-colors line-clamp-2 min-h-[2.3rem] sm:min-h-[2.5rem] font-medium leading-snug">
+                {name}
+              </h3>
+            </Link>
           </div>
 
-          {/* Product Name */}
-          <Link href={`/product/${productId}`} className="block group/title">
-            <h3 className="text-[14.5px] sm:text-[15px] font-serif text-skin-charcoal group-hover/title:text-skin-terracotta transition-colors line-clamp-2 min-h-[2.6rem] font-medium leading-snug">
-              {name}
-            </h3>
-          </Link>
-
-          {/* Price (Dedicated line - NEVER wraps) */}
-          <div className="flex items-baseline gap-2 pt-0.5">
-            <span className="text-lg font-bold text-skin-charcoal whitespace-nowrap">
+          {/* Price Line */}
+          <div className="flex items-baseline gap-1.5 sm:gap-2 pt-1">
+            <span className="text-base sm:text-lg font-bold text-skin-charcoal whitespace-nowrap">
               ৳ {Number(finalPrice || 0).toFixed(2)}
             </span>
             {discount > 0 && (
-              <span className="text-xs text-skin-charcoal/40 line-through whitespace-nowrap font-light">
+              <span className="text-[11px] sm:text-xs text-skin-charcoal/40 line-through whitespace-nowrap font-light">
                 ৳ {Number(price || 0).toFixed(2)}
               </span>
             )}
@@ -169,23 +171,23 @@ const FeaturePDCard = ({ product }) => {
         </div>
       </div>
 
-      {/* Action Button: Luxury Solid Charcoal to Terracotta */}
-      <div className="px-4 pb-4 pt-0">
+      {/* Action Button: Luxury Solid Charcoal to Terracotta - Never wraps */}
+      <div className="px-3 pb-3 sm:px-4 sm:pb-4 pt-0 mt-auto">
         <button
           onClick={handleAddToCart}
           disabled={inStock === false}
           aria-label={`Add ${name} to cart`}
-          className={`w-full py-2.5 rounded-xl text-xs uppercase tracking-[0.16em] font-bold transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer shadow-xs ${
+          className={`w-full h-9 sm:h-10 px-2 sm:px-3 rounded-xl text-[11px] sm:text-xs uppercase tracking-wider font-bold transition-all duration-300 flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer shadow-xs whitespace-nowrap ${
             inStock !== false
               ? "bg-skin-charcoal text-white hover:bg-skin-terracotta active:scale-[0.98] hover:shadow-md"
               : "bg-skin-sand text-skin-charcoal/40 cursor-not-allowed"
           }`}
         >
           <FiShoppingBag
-            size={13}
-            className="transition-transform group-hover:scale-110"
+            size={14}
+            className="shrink-0 transition-transform group-hover:scale-110"
           />
-          <span>{inStock !== false ? "Add to Cart" : "Out of Stock"}</span>
+          <span className="whitespace-nowrap">{inStock !== false ? "Add to Cart" : "Out of Stock"}</span>
         </button>
       </div>
     </div>

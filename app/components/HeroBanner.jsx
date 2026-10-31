@@ -1,56 +1,220 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { FiArrowRight, FiArrowLeft } from "react-icons/fi";
-import { HiOutlineSparkles, HiSparkles } from "react-icons/hi2";
+import { FiChevronLeft, FiChevronRight, FiArrowRight } from "react-icons/fi";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, EffectFade, Navigation, Keyboard } from "swiper/modules";
 
-// Swiper core styles
+// Swiper styles
 import "swiper/css";
 import "swiper/css/effect-fade";
 import "swiper/css/navigation";
 
-const stats = [
-  { value: "50K+", label: "Happy Customers" },
-  { value: "100%", label: "Natural Ingredients" },
-  { value: "4.9★", label: "Average Rating" },
-];
+// Trust Badge SVGs matching the user's reference design
+const BadgeIcon = ({ type }) => {
+  switch (type) {
+    case "leaf":
+      return (
+        <svg
+          className="w-5 h-5 sm:w-6 sm:h-6 text-[#C5747F]"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.6"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z" />
+          <path d="M2 21c0-3 1.85-5.36 5.08-6" />
+        </svg>
+      );
+    case "bunny":
+      return (
+        <svg
+          className="w-5 h-5 sm:w-6 sm:h-6 text-[#C5747F]"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.6"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M9 3.5C8 2 6 2 5 3.5s1 4.5 2 6" />
+          <path d="M12 3.5C13 2 15 2 16 3.5s-1 4.5-2 6" />
+          <path d="M7 11.5c-2.5 1.5-3 4.5-2 7 1.2 3 5 3.5 7 3.5 3 0 6.5-1.5 7-4.5.5-3-1.5-5.5-4.5-6" />
+          <circle cx="8.5" cy="14" r="0.75" fill="currentColor" />
+          <circle cx="15.5" cy="14" r="0.75" fill="currentColor" />
+          <path d="M11.5 16.5c.3.3.7.3 1 0" />
+        </svg>
+      );
+    case "flask":
+      return (
+        <svg
+          className="w-5 h-5 sm:w-6 sm:h-6 text-[#C5747F]"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.6"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M10 2v5.5L4.5 18a2 2 0 0 0 1.7 3h11.6a2 2 0 0 0 1.7-3L14 7.5V2" />
+          <path d="M8.5 2h7" />
+          <path d="M7.5 16h9" />
+          <circle cx="10" cy="13" r="0.75" fill="currentColor" />
+          <circle cx="13.5" cy="14.5" r="0.75" fill="currentColor" />
+        </svg>
+      );
+    case "drop":
+      return (
+        <svg
+          className="w-5 h-5 sm:w-6 sm:h-6 text-[#C5747F]"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.6"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M12 2.7l5.66 5.66a8 8 0 1 1-11.31 0z" />
+          <path d="M12 11.5a3 3 0 0 1 3 3" />
+        </svg>
+      );
+    case "skin":
+      return (
+        <svg
+          className="w-5 h-5 sm:w-6 sm:h-6 text-[#C5747F]"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.6"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M12 2a7 7 0 0 0-7 7c0 2.5 1.2 4.8 2.2 6.3.8 1.2 1.8 2.7 1.8 4.7h6c0-2 1-3.5 1.8-4.7 1-1.5 2.2-3.8 2.2-6.3a7 7 0 0 0-7-7Z" />
+          <path d="M9 10h.01" />
+          <path d="M15 10h.01" />
+          <path d="M10.5 13.5a2.5 2.5 0 0 0 3 0" />
+        </svg>
+      );
+    case "shield":
+      return (
+        <svg
+          className="w-5 h-5 sm:w-6 sm:h-6 text-[#C5747F]"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.6"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+          <path d="m9 12 2 2 4-4" />
+        </svg>
+      );
+    default:
+      return null;
+  }
+};
 
 const slides = [
   {
     id: 1,
-    badge: "Dermatologist Formulated · 100% Organic",
-    headline: "Reveal Your",
-    accent: "Natural Radiance",
-    sub: "Crafted with pure botanicals and bio-active scientific actives — gentle, clinically backed care designed for your skin's unique harmony.",
-    bg: "https://images.pexels.com/photos/3762756/pexels-photo-3762756.jpeg",
-    primaryCta: { label: "Explore Shop", href: "/product" },
-    secondaryCta: { label: "Our Story", href: "/about" },
-    tag: "Clean · Cruelty Free · Vegan",
+    tag: null, // Image 1 has no tag above title
+    headlineLine1: "Reveal Your",
+    headlineLine2: "Natural Beauty",
+    description:
+      "Premium cosmetics crafted with natural ingredients for healthy, glowing skin.",
+    primaryCta: { label: "SHOP NOW", href: "/product" },
+    secondaryCta: null,
+    image: "/hero/hero-slide-1.jpg",
+    alt: "Aura Skincare luxury cosmetics set with gentle cleanser, rose water toner, luminous moisture cream and bloom serum on stone pedestal",
+    trustBadges: [
+      {
+        type: "leaf",
+        line1: "NATURAL",
+        line2: "INGREDIENTS",
+      },
+      {
+        type: "bunny",
+        line1: "CRUELTY",
+        line2: "FREE",
+      },
+      {
+        type: "flask",
+        line1: "PARABEN",
+        line2: "FREE",
+      },
+    ],
   },
   {
     id: 2,
-    badge: "New Season · Botanical Complex",
-    headline: "Glow From",
-    accent: "Deep Within",
-    sub: "Our vitamin-rich serums infuse multi-depth hydration and reinforce your skin barrier for an effortless, lit-from-within luminosity.",
-    bg: "https://images.pexels.com/photos/3985360/pexels-photo-3985360.jpeg",
-    primaryCta: { label: "Discover Serums", href: "/product" },
-    secondaryCta: { label: "Skin Guide", href: "/about" },
-    tag: "Hyaluronic + Vitamin C Active",
+    tag: "NEW ARRIVAL",
+    headlineLine1: "Glow Naturally.",
+    headlineLine2: "Shine Confidently.",
+    description:
+      "Skincare and beauty essentials that bring out your natural radiance.",
+    primaryCta: { label: "SHOP NOW", href: "/product" },
+    secondaryCta: { label: "EXPLORE COLLECTION", href: "/product?sort=newest" },
+    image: "/hero/hero-slide-2.jpg",
+    alt: "Smiling woman with radiant dewy skin touching cheek next to Aura Skincare Radiance Boost serum on travertine pedestal",
+    trustBadges: [
+      {
+        type: "leaf",
+        line1: "Clean",
+        line2: "Ingredients",
+      },
+      {
+        type: "bunny",
+        line1: "Cruelty",
+        line2: "Free",
+      },
+      {
+        type: "drop",
+        line1: "Dermatologist",
+        line2: "Tested",
+      },
+      {
+        type: "skin",
+        line1: "For All",
+        line2: "Skin Types",
+      },
+    ],
   },
   {
     id: 3,
-    badge: "SPF 50+ · Invisible Everyday Defense",
-    headline: "Protect Your",
-    accent: "Everyday Glow",
-    sub: "Featherlight, non-greasy shield guarding against UV damage and urban pollutants while leaving your complexion velvety soft.",
-    bg: "https://images.pexels.com/photos/3736398/pexels-photo-3736398.jpeg",
-    primaryCta: { label: "Shop Sun Protection", href: "/product" },
-    secondaryCta: { label: "Learn More", href: "/about" },
-    tag: "Zero White Cast · Matte Finish",
+    tag: "ORGANIC FORMULA",
+    headlineLine1: "Nourish Deeply.",
+    headlineLine2: "Bloom Gracefully.",
+    description:
+      "Restorative botanical face oils and velvety hydrating creams designed to replenish and strengthen your barrier.",
+    primaryCta: { label: "SHOP NOW", href: "/product" },
+    secondaryCta: { label: "VIEW ROUTINE", href: "/category" },
+    image: "/hero/hero-slide-3.jpg",
+    alt: "Aura Skincare restorative face oil and hydrating creme jar on textured travertine stone with eucalyptus and rose petals",
+    trustBadges: [
+      {
+        type: "leaf",
+        line1: "100% Organic",
+        line2: "Botanicals",
+      },
+      {
+        type: "drop",
+        line1: "Deep Moisture",
+        line2: "Hydration",
+      },
+      {
+        type: "bunny",
+        line1: "Cruelty",
+        line2: "Free",
+      },
+      {
+        type: "shield",
+        line1: "Skin Barrier",
+        line2: "Defense",
+      },
+    ],
   },
 ];
 
@@ -76,170 +240,188 @@ const HeroBanner = () => {
     }
   };
 
-  const activeSlide = slides[activeIndex] || slides[0];
+  const currentSlide = slides[activeIndex] || slides[0];
 
   return (
     <section
-      className="relative w-full min-h-[640px] md:h-[90vh] lg:h-[92vh] max-h-[960px] overflow-hidden bg-skin-charcoal"
-      aria-label="Hero Carousel"
+      id="hero-banner"
+      className="relative w-full overflow-hidden bg-[#FBF7F4] select-none"
+      aria-label="Hero Banner Slider"
     >
-      <Swiper
-        modules={[Autoplay, EffectFade, Navigation, Keyboard]}
-        effect="fade"
-        fadeEffect={{ crossFade: true }}
-        loop={true}
-        speed={1000}
-        keyboard={{ enabled: true }}
-        autoplay={{
-          delay: 5500,
-          disableOnInteraction: false,
-          pauseOnMouseEnter: true,
-        }}
-        onSwiper={setSwiperInstance}
-        onSlideChange={(swiper) => setActiveIndex(swiper.realIndex)}
-        className="w-full h-full"
-      >
-        {slides.map((slide, i) => (
-          <SwiperSlide key={slide.id || i}>
-            <div className="relative w-full h-full min-h-[640px] md:min-h-full">
-              {/* Background Image with subtle Ken Burns zoom */}
-              <div
-                className={`absolute inset-0 bg-center bg-cover transition-transform duration-1000 ease-out ${
-                  activeIndex === i ? "scale-105" : "scale-100"
-                }`}
-                style={{ backgroundImage: `url('${slide.bg}')` }}
-              />
+      {/* ── Background & Visual Swiper Slider ── */}
+      <div className="relative w-full h-[580px] sm:h-[620px] md:h-[660px] lg:h-[720px] xl:h-[760px]">
+        <Swiper
+          modules={[Autoplay, EffectFade, Navigation, Keyboard]}
+          effect="fade"
+          fadeEffect={{ crossFade: true }}
+          loop={true}
+          speed={900}
+          keyboard={{ enabled: true }}
+          autoplay={{
+            delay: 6000,
+            disableOnInteraction: false,
+            pauseOnMouseEnter: true,
+          }}
+          onSwiper={setSwiperInstance}
+          onSlideChange={(swiper) => setActiveIndex(swiper.realIndex)}
+          className="w-full h-full"
+        >
+          {slides.map((slide, i) => (
+            <SwiperSlide key={slide.id || i}>
+              <div className="relative w-full h-full">
+                {/* Visual Image with gentle zoom effect */}
+                <div
+                  className={`absolute inset-0 bg-cover bg-no-repeat transition-transform duration-1000 ease-out ${
+                    activeIndex === i ? "scale-[1.03]" : "scale-100"
+                  }`}
+                  style={{
+                    backgroundImage: `url('${slide.image}')`,
+                    backgroundPosition: "right 20% center",
+                  }}
+                  role="img"
+                  aria-label={slide.alt}
+                />
 
-              {/* Multi-layered Cinematic Gradients for high contrast & luxury aesthetic */}
-              <div className="absolute inset-0 bg-gradient-to-r from-skin-charcoal/95 via-skin-charcoal/75 to-skin-charcoal/40 md:to-transparent" />
-              <div className="absolute inset-0 bg-gradient-to-t from-skin-charcoal/90 via-transparent to-skin-charcoal/30" />
+                {/* Soft Studio Ambient Gradient:
+                    Blends from warm solid ivory/cream on the left (text area)
+                    into translucent blush/cream, revealing product photography on right.
+                    On small mobile screens, protects legibility across the entire width. */}
+                <div className="absolute inset-0 bg-gradient-to-r from-[#FAF6F3] via-[#FAF6F3]/95 via-55% sm:via-45% md:via-50% to-[#FAF6F3]/50 md:to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#FAF6F3] via-transparent to-transparent md:hidden" />
+              </div>
+            </SwiperSlide>
+          ))}
+        </Swiper>
 
-              {/* Decorative Glow Orbs */}
-              <div className="absolute top-1/4 right-1/4 w-96 h-96 rounded-full bg-skin-terracotta/15 blur-3xl pointer-events-none" />
-              <div className="absolute bottom-1/3 left-1/4 w-80 h-80 rounded-full bg-skin-sage/15 blur-3xl pointer-events-none" />
+        {/* ── Foreground Animated Content Layer ── */}
+        <div className="absolute inset-0 z-10 pointer-events-none">
+          <div className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-14 h-full flex flex-col justify-center pt-8 sm:pt-0 pb-16 sm:pb-0">
+            <div className="max-w-xl lg:max-w-2xl">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={activeIndex}
+                  initial={{ opacity: 0, y: 18 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -12 }}
+                  transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+                  className="pointer-events-auto"
+                >
+                  {/* Optional Top Tag / Badge (e.g., "NEW ARRIVAL") */}
+                  {currentSlide.tag && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.1, duration: 0.4 }}
+                      className="mb-3 sm:mb-4"
+                    >
+                      <span className="text-[#C5747F] text-xs sm:text-[13px] font-semibold tracking-[0.22em] uppercase inline-block">
+                        {currentSlide.tag}
+                      </span>
+                    </motion.div>
+                  )}
+
+                  {/* Main Editorial Serif Headline */}
+                  <h1 className="font-serif text-[#22201E] text-4xl sm:text-5xl md:text-6xl lg:text-[68px] xl:text-[74px] font-normal leading-[1.08] tracking-tight mb-4 sm:mb-5">
+                    <span className="block">{currentSlide.headlineLine1}</span>
+                    <span className="block">{currentSlide.headlineLine2}</span>
+                  </h1>
+
+                  {/* Subtitle / Description Copy */}
+                  <p className="text-[#5E5751] text-sm sm:text-base md:text-lg font-light leading-relaxed max-w-md sm:max-w-lg mb-7 sm:mb-9">
+                    {currentSlide.description}
+                  </p>
+
+                  {/* Call-To-Action Buttons */}
+                  <div className="flex flex-wrap items-center gap-4 sm:gap-6 mb-8 sm:mb-12">
+                    {/* Primary Button: "SHOP NOW" in dusty rose pill shape */}
+                    <Link
+                      href={currentSlide.primaryCta.href}
+                      className="inline-flex items-center justify-center px-8 sm:px-10 py-3.5 sm:py-4 rounded-full bg-[#C5747F] hover:bg-[#B5636E] text-white text-xs sm:text-[13px] font-semibold tracking-[0.18em] uppercase shadow-md shadow-[#C5747F]/25 hover:shadow-lg hover:shadow-[#C5747F]/35 active:scale-[0.98] transition-all duration-300"
+                    >
+                      {currentSlide.primaryCta.label}
+                    </Link>
+
+                    {/* Secondary Button / Text Link (Image 2 style: "EXPLORE COLLECTION ->") */}
+                    {currentSlide.secondaryCta && (
+                      <Link
+                        href={currentSlide.secondaryCta.href}
+                        className="group inline-flex items-center gap-2 text-xs sm:text-[13px] font-bold tracking-[0.18em] uppercase text-[#23201D] hover:text-[#C5747F] transition-colors py-2"
+                      >
+                        <span>{currentSlide.secondaryCta.label}</span>
+                        <FiArrowRight
+                          size={15}
+                          className="group-hover:translate-x-1.5 transition-transform duration-300"
+                        />
+                      </Link>
+                    )}
+                  </div>
+
+                  {/* Trust Badges Bar (Leaf, Bunny, Paraben / Drop / Skin) */}
+                  <div className="flex items-center gap-4 sm:gap-6 lg:gap-8 pt-2 sm:pt-4">
+                    {currentSlide.trustBadges.map((badge, idx) => (
+                      <React.Fragment key={idx}>
+                        <div className="flex flex-col items-center sm:items-start text-center sm:text-left gap-1.5">
+                          <div className="flex items-center justify-center">
+                            <BadgeIcon type={badge.type} />
+                          </div>
+                          <div className="text-[10px] sm:text-[11px] font-semibold text-[#4A4540] tracking-wider uppercase leading-tight">
+                            <span>{badge.line1}</span>
+                            {badge.line2 && (
+                              <span className="block">{badge.line2}</span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Subtle divider line between badges (shown like in image 2) */}
+                        {idx < currentSlide.trustBadges.length - 1 && (
+                          <div
+                            className="hidden sm:block h-7 w-px bg-[#E5DDD5]"
+                            aria-hidden="true"
+                          />
+                        )}
+                      </React.Fragment>
+                    ))}
+                  </div>
+                </motion.div>
+              </AnimatePresence>
             </div>
-          </SwiperSlide>
-        ))}
-      </Swiper>
-
-      {/* Floating Animated Slide Content Overlay */}
-      <div className="absolute inset-0 z-10 pointer-events-none">
-        <div className="max-w-7xl mx-auto px-6 md:px-12 h-full flex flex-col justify-center pt-16 md:pt-20 pb-24 md:pb-20">
-          <div className="max-w-3xl pointer-events-none">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={activeIndex}
-                initial={{ opacity: 0, y: 25 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-              >
-                {/* Badge & Tag */}
-                <div className="flex flex-wrap items-center gap-3 mb-5">
-                  <span className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 text-white/95 px-4 py-1.5 rounded-full text-[10px] sm:text-[11px] tracking-[0.2em] uppercase font-semibold shadow-sm">
-                    <HiOutlineSparkles size={14} className="text-skin-sand animate-pulse" />
-                    {activeSlide.badge}
-                  </span>
-                  <span className="hidden sm:inline-flex items-center gap-1.5 text-skin-sand/80 text-[11px] tracking-wider uppercase">
-                    <HiSparkles size={11} className="text-skin-terracotta" />
-                    {activeSlide.tag}
-                  </span>
-                </div>
-
-                {/* Editorial Headline */}
-                <h1 className="text-white font-serif text-4xl sm:text-6xl md:text-7xl lg:text-8xl leading-[1.08] mb-5 sm:mb-6 tracking-tight">
-                  {activeSlide.headline}{" "}
-                  <br />
-                  <span className="italic font-light text-skin-sand">
-                    {activeSlide.accent}
-                  </span>
-                </h1>
-
-                {/* Description Copy */}
-                <p className="text-white/80 text-sm sm:text-base md:text-lg mb-8 sm:mb-10 max-w-xl font-light leading-relaxed">
-                  {activeSlide.sub}
-                </p>
-
-                {/* CTA Action Buttons */}
-                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-10 sm:mb-14 pointer-events-auto">
-                  <Link href={activeSlide.primaryCta.href}>
-                    <button className="group w-full sm:w-auto flex items-center justify-center gap-3 px-8 py-4 text-[11px] tracking-[0.2em] uppercase text-white font-bold rounded-2xl bg-skin-terracotta hover:bg-skin-terracotta/90 active:scale-[0.98] transition-all duration-300 shadow-xl shadow-skin-terracotta/30 min-w-[170px] cursor-pointer">
-                      {activeSlide.primaryCta.label}
-                      <FiArrowRight
-                        size={15}
-                        className="group-hover:translate-x-1.5 transition-transform duration-300"
-                      />
-                    </button>
-                  </Link>
-                  <Link href={activeSlide.secondaryCta.href}>
-                    <button className="w-full sm:w-auto flex items-center justify-center gap-3 px-8 py-4 text-[11px] tracking-[0.2em] uppercase text-white font-bold rounded-2xl bg-white/10 hover:bg-white/20 active:scale-[0.98] backdrop-blur-md border border-white/25 transition-all duration-300 min-w-[170px] cursor-pointer">
-                      {activeSlide.secondaryCta.label}
-                    </button>
-                  </Link>
-                </div>
-
-                {/* Trust Stats Bar */}
-                <div className="flex items-center gap-6 sm:gap-10 border-t border-white/10 pt-6 max-w-lg">
-                  {stats.map((stat, i) => (
-                    <div key={i} className="flex flex-col">
-                      <span className="text-white font-serif text-xl sm:text-2xl font-bold leading-tight">
-                        {stat.value}
-                      </span>
-                      <span className="text-white/60 text-[9px] sm:text-[10px] uppercase tracking-widest mt-0.5">
-                        {stat.label}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </motion.div>
-            </AnimatePresence>
           </div>
         </div>
-      </div>
 
-      {/* Floating First Purchase Promo Pill (bottom right desktop) */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.7, delay: 0.8 }}
-        className="absolute bottom-8 right-6 md:right-10 z-20 hidden md:flex items-center gap-3 bg-skin-charcoal/60 backdrop-blur-xl border border-white/20 text-white px-5 py-3.5 rounded-2xl shadow-2xl hover:border-skin-terracotta/50 transition-colors"
-      >
-        <span className="text-2xl select-none">🎁</span>
-        <div className="text-left">
-          <p className="text-[9px] uppercase tracking-[0.2em] font-bold text-skin-sand">
-            First Purchase
-          </p>
-          <p className="text-xs font-semibold text-white">
-            10% OFF · code{" "}
-            <span className="bg-skin-terracotta text-white px-1.5 py-0.5 rounded-md text-[10px] font-bold ml-1 tracking-wider">
-              AURA10
-            </span>
-          </p>
+        {/* ── Slide Navigation Controls (Bottom Right - Exactly as in user image 2) ── */}
+        <div className="absolute bottom-6 sm:bottom-8 right-6 sm:right-12 z-20 flex items-center gap-2 sm:gap-3 pointer-events-auto">
+          {/* Slide Indicator ("1 / 3") */}
+          <div className="text-xs sm:text-[13px] font-medium text-[#4A4540] tracking-widest select-none mr-1 sm:mr-2">
+            <span>{activeIndex + 1}</span>
+            <span className="mx-1 text-[#8C837A]">/</span>
+            <span className="text-[#8C837A]">{slides.length}</span>
+          </div>
+
+          {/* Previous Slide Button */}
+          <button
+            onClick={handlePrev}
+            aria-label="Previous slide"
+            className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/95 hover:bg-[#C5747F] text-[#3A3530] hover:text-white border border-[#E8E0D7] shadow-sm flex items-center justify-center transition-all duration-300 active:scale-95 cursor-pointer"
+          >
+            <FiChevronLeft size={16} />
+          </button>
+
+          {/* Next Slide Button */}
+          <button
+            onClick={handleNext}
+            aria-label="Next slide"
+            className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/95 hover:bg-[#C5747F] text-[#3A3530] hover:text-white border border-[#E8E0D7] shadow-sm flex items-center justify-center transition-all duration-300 active:scale-95 cursor-pointer"
+          >
+            <FiChevronRight size={16} />
+          </button>
         </div>
-      </motion.div>
 
-      {/* Custom Slider Navigation Controls (Arrow Buttons + Dots + Counter) */}
-      <div className="absolute bottom-6 sm:bottom-8 left-6 sm:left-12 z-20 flex items-center gap-3 sm:gap-4 pointer-events-auto">
-        {/* Previous Button */}
-        <button
-          onClick={handlePrev}
-          aria-label="Previous slide"
-          className="w-10 h-10 rounded-full bg-white/10 hover:bg-skin-terracotta active:scale-95 backdrop-blur-md border border-white/20 hover:border-skin-terracotta text-white flex items-center justify-center transition-all duration-300 shadow-lg cursor-pointer"
+        {/* ── Subtle Slide Dots for Quick Tap (Bottom Left) ── */}
+        <div
+          className="absolute bottom-6 sm:bottom-8 left-6 sm:left-14 z-20 hidden md:flex items-center gap-2 pointer-events-auto"
+          role="tablist"
+          aria-label="Slide indicators"
         >
-          <FiArrowLeft size={16} />
-        </button>
-
-        {/* Next Button */}
-        <button
-          onClick={handleNext}
-          aria-label="Next slide"
-          className="w-10 h-10 rounded-full bg-white/10 hover:bg-skin-terracotta active:scale-95 backdrop-blur-md border border-white/20 hover:border-skin-terracotta text-white flex items-center justify-center transition-all duration-300 shadow-lg cursor-pointer"
-        >
-          <FiArrowRight size={16} />
-        </button>
-
-        {/* Slide Pagination Dots / Progress Bars */}
-        <div className="flex items-center gap-2 pl-2" role="tablist" aria-label="Slides navigation">
           {slides.map((_, idx) => {
             const isActive = activeIndex === idx;
             return (
@@ -249,32 +431,15 @@ const HeroBanner = () => {
                 aria-selected={isActive}
                 aria-label={`Go to slide ${idx + 1}`}
                 onClick={() => handleGoToSlide(idx)}
-                className={`h-2 rounded-full transition-all duration-500 cursor-pointer ${
+                className={`h-1.5 rounded-full transition-all duration-500 cursor-pointer ${
                   isActive
-                    ? "w-8 bg-skin-terracotta shadow-md shadow-skin-terracotta/50"
-                    : "w-2.5 bg-white/35 hover:bg-white/70"
+                    ? "w-7 bg-[#C5747F] shadow-sm"
+                    : "w-2 bg-[#D9CEC4] hover:bg-[#C5747F]/60"
                 }`}
               />
             );
           })}
         </div>
-
-        {/* Slide Counter (01 / 03) */}
-        <div className="hidden sm:flex items-center text-white/50 text-xs font-mono tracking-widest pl-2">
-          <span className="text-white font-semibold">
-            0{activeIndex + 1}
-          </span>
-          <span className="mx-1 text-white/30">/</span>
-          <span>0{slides.length}</span>
-        </div>
-      </div>
-
-      {/* Subtle Scroll Hint Indicator (Desktop Center) */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 hidden lg:flex flex-col items-center gap-2 pointer-events-none">
-        <span className="text-white/40 text-[9px] uppercase tracking-[0.25em]">
-          Scroll
-        </span>
-        <div className="w-px h-8 bg-gradient-to-b from-white/40 to-transparent animate-pulse" />
       </div>
     </section>
   );

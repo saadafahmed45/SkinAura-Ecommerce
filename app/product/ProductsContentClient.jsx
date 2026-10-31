@@ -123,6 +123,8 @@ export default function ProductsContentClient({
       if (selectedRating > 0) params.set("rating", selectedRating);
       const isFeaturedParam = searchParams.get("isFeatured");
       if (isFeaturedParam) params.set("isFeatured", isFeaturedParam);
+      const tagParam = searchParams.get("tag");
+      if (tagParam) params.set("tag", tagParam);
       if (searchQuery.trim()) params.set("search", searchQuery.trim());
       params.set("page", currentPage);
       params.set("limit", productsPerPage);
@@ -139,6 +141,12 @@ export default function ProductsContentClient({
       if (isFeaturedParam) {
         list = list.filter((p) => Boolean(p.isFeatured) === (isFeaturedParam === "true"));
       }
+      const tagParam = searchParams.get("tag");
+      if (tagParam) {
+        list = list.filter((p) =>
+          Array.isArray(p.tags) && p.tags.some((t) => t.toLowerCase() === tagParam.toLowerCase())
+        );
+      }
       if (selectedCategory && selectedCategory !== "all") {
         list = list.filter(
           (p) => p.category?.toLowerCase() === selectedCategory.toLowerCase()
@@ -150,7 +158,8 @@ export default function ProductsContentClient({
           (p) =>
             p.name?.toLowerCase().includes(q) ||
             p.brand?.toLowerCase().includes(q) ||
-            p.category?.toLowerCase().includes(q)
+            p.category?.toLowerCase().includes(q) ||
+            (Array.isArray(p.tags) && p.tags.some((t) => t.toLowerCase().includes(q)))
         );
       }
       if (minPrice > 0) list = list.filter((p) => (p.price || 0) >= minPrice);

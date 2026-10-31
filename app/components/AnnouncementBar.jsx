@@ -5,6 +5,7 @@ import { HiSparkles } from "react-icons/hi2";
 import { motion, AnimatePresence } from "framer-motion";
 
 const messages = [
+  { text: "Winter Skin Rescue — Explore our cold-weather barrier rituals", highlight: "Winter Skin Rescue" },
   { text: "Free delivery on orders over Rs. 2,500", highlight: "Rs. 2,500" },
   { text: "New arrivals — Shop the latest serums & moisturizers", highlight: "New arrivals" },
   { text: "Use code SKINCARE15 for 15% off your first order", highlight: "SKINCARE15" },

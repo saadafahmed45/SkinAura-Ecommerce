@@ -26,8 +26,9 @@ import TrackOrderModal from "./TrackOrderModal";
 import api from "../lib/api";
 
 const TRENDING_SEARCHES = [
-  "Vitamin C Serum",
+  "Winter Care",
   "Hydrating Cream",
+  "Vitamin C Serum",
   "Niacinamide Gel",
   "Daily Sunscreen",
   "Gentle Cleanser",
@@ -61,6 +62,7 @@ function HeaderContent() {
   const navLinks = [
     { name: "Home", href: "/" },
     { name: "Shop", href: "/product" },
+    { name: "Winter Edit", href: "/product?tag=winter" },
     { name: "Categories", href: "/category" },
     { name: "New Arrivals", href: "/product?sort=newest" },
     { name: "Best Sellers", href: "/product?isFeatured=true" },

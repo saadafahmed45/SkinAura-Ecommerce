@@ -7,7 +7,6 @@ import {
   FiArrowRight,
   FiChevronDown,
   FiFilter,
-  FiSparkles,
   FiLayers,
 } from "react-icons/fi";
 import { HiOutlineSparkles } from "react-icons/hi2";
