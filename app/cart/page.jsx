@@ -44,14 +44,24 @@ export default function Cart() {
                 >
                   {/* Left */}
                   <div className="flex items-center gap-4">
-                    <img
-                      src={item?.images?.[0]}
-                      alt={item.name}
-                      className="w-20 h-20 rounded-lg object-cover bg-white p-1 border border-skin-sand/20"
-                    />
+                    <Link
+                      href={`/product/${item.slug || item.id || item._id}`}
+                      className="shrink-0 group/img"
+                    >
+                      <img
+                        src={item?.images?.[0]}
+                        alt={item.name}
+                        className="w-20 h-20 rounded-lg object-cover bg-white p-1 border border-skin-sand/20 group-hover/img:border-skin-terracotta/40 transition-colors"
+                      />
+                    </Link>
 
                     <div className="space-y-1">
-                      <h3 className="text-sm sm:text-md font-medium text-skin-charcoal">{item.name}</h3>
+                      <Link
+                        href={`/product/${item.slug || item.id || item._id}`}
+                        className="hover:text-skin-terracotta transition-colors"
+                      >
+                        <h3 className="text-sm sm:text-md font-medium text-skin-charcoal hover:text-skin-terracotta transition-colors">{item.name}</h3>
+                      </Link>
                       <p className="text-skin-terracotta text-xs font-bold">
                         ${Number(item.price || 0).toFixed(2)}
                       </p>

@@ -1,4 +1,5 @@
 import React from "react";
+import { redirect } from "next/navigation";
 import ProductDetailsClient from "./ProductDetailsClient";
 import {
   getProductByIdOrSlug,
@@ -27,6 +28,9 @@ export async function generateMetadata({ params }) {
   return {
     title,
     description,
+    alternates: {
+      canonical: `/product/${product.slug || product.id}`,
+    },
     openGraph: {
       title,
       description,
@@ -37,10 +41,18 @@ export async function generateMetadata({ params }) {
 
 export default async function ProductDetailsPage({ params }) {
   const resolvedParams = await params;
-  const id = resolvedParams.id;
+  const idOrSlug = resolvedParams.id;
 
   // Server-side fetch product
-  const product = await getProductByIdOrSlug(id);
+  const product = await getProductByIdOrSlug(idOrSlug);
+
+  // If accessed by MongoDB ObjectId or legacy numeric ID instead of slug, redirect to clean slug URL
+  if (
+    product?.slug &&
+    decodeURIComponent(idOrSlug).toLowerCase() !== product.slug.toLowerCase()
+  ) {
+    redirect(`/product/${encodeURIComponent(product.slug)}`);
+  }
 
   // Server-side fetch related products in parallel
   const relatedProducts = product?.category

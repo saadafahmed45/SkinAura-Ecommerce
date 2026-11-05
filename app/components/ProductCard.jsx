@@ -26,7 +26,7 @@ const ProductCard = ({ product }) => {
     category,
   } = product;
 
-  const productId = _id || id || slug;
+  const productSlug = slug || _id || id;
   const defaultFallback =
     "https://images.pexels.com/photos/3762756/pexels-photo-3762756.jpeg";
 
@@ -117,7 +117,7 @@ const ProductCard = ({ product }) => {
 
           {/* Image */}
           <Link
-            href={`/product/${productId}`}
+            href={`/product/${productSlug}`}
             className="block relative w-full h-full"
           >
             <Image
@@ -154,7 +154,7 @@ const ProductCard = ({ product }) => {
             </div>
 
             {/* Product Name */}
-            <Link href={`/product/${productId}`} className="block group/title">
+            <Link href={`/product/${productSlug}`} className="block group/title">
               <h3 className="text-[13.5px] sm:text-[14.5px] font-serif text-skin-charcoal group-hover/title:text-skin-terracotta transition-colors line-clamp-2 min-h-[2.3rem] sm:min-h-[2.5rem] font-medium leading-snug">
                 {name}
               </h3>

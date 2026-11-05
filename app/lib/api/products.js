@@ -24,6 +24,14 @@ const sanitizeProductImageUrl = (url) => {
 export const normalizeProduct = (p) => {
   if (!p) return null;
   const id = p._id || p.id || p.legacyId;
+  const slug =
+    p.slug ||
+    (p.name
+      ? p.name
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/(^-|-$)/g, "")
+      : String(id));
   const rawList =
     Array.isArray(p.images) && p.images.length > 0
       ? p.images
@@ -36,6 +44,7 @@ export const normalizeProduct = (p) => {
     ...p,
     id,
     _id: p._id || id,
+    slug,
     images,
     image: images[0],
   };
@@ -259,7 +268,12 @@ export async function getProductByIdOrSlug(idOrSlug) {
     (p) =>
       String(p.id) === cleanId ||
       String(p._id) === cleanId ||
-      p.slug?.toLowerCase() === cleanId.toLowerCase()
+      p.slug?.toLowerCase() === cleanId.toLowerCase() ||
+      (p.name &&
+        p.name
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/(^-|-$)/g, "") === cleanId.toLowerCase())
   );
 
   return fallback ? normalizeProduct(fallback) : null;

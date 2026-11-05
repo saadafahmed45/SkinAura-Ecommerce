@@ -58,18 +58,21 @@ export const CartProvider = ({ children }) => {
   /* -----------------------------------
     Add To Cart
   -------------------------------------*/
-  const handleAddedCart = (item) => {
+  const handleAddedCart = (item, customQty = null, silent = false) => {
     const copy = [...cartItems];
-    const index = copy.findIndex((i) => i.id === item.id);
+    const itemId = item.id || item._id;
+    const index = copy.findIndex((i) => (i.id && i.id === itemId) || (i._id && i._id === itemId));
+    const price = Number(item.discount > 0 && item.discountPrice ? item.discountPrice : item.price) || 0;
+    const addQty = Math.max(1, Number(customQty || item.quantity || 1));
 
-    const price = Number(item.price) || 0;
+    // Calculated price and quantity above
 
     if (index === -1) {
       copy.push({
         ...item,
         price,
-        quantity: 1,
-        totalPrice: price,
+        quantity: addQty,
+        totalPrice: price * addQty,
       });
 
       updateLocalStorage(copy);
@@ -82,9 +85,12 @@ export const CartProvider = ({ children }) => {
         cancelButtonText: "Continue shopping",
       }).then((res) => res.isConfirmed && router.push("/cart"));
     } else {
+      const newQty = Number(copy[index].quantity || 1) + addQty;
+      copy[index] = { ...copy[index], price, quantity: newQty, totalPrice: price * newQty };
+      updateLocalStorage(copy);
       Swal.fire({
-        title: "Already in cart",
-        icon: "info",
+        title: "Cart Updated!",
+        icon: "success",
         showCancelButton: true,
         confirmButtonText: "Go to cart",
         cancelButtonText: "Keep shopping",

@@ -348,7 +348,7 @@ function HeaderContent() {
                           return (
                             <Link
                               key={product._id || product.id || product.name}
-                              href={`/product/${product._id || product.id || product.slug || ""}`}
+                              href={`/product/${product.slug || product._id || product.id || ""}`}
                               onClick={() => {
                                 saveRecentSearch(product.name);
                                 setIsSearchFocused(false);
@@ -587,7 +587,7 @@ function HeaderContent() {
                         return (
                           <Link
                             key={product._id || product.id || product.name}
-                            href={`/product/${product._id || product.id || product.slug || ""}`}
+                            href={`/product/${product.slug || product._id || product.id || ""}`}
                             onClick={() => {
                               saveRecentSearch(product.name);
                               setIsSearchFocused(false);
