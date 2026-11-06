@@ -19,6 +19,78 @@ const sanitizeProductImageUrl = (url) => {
 };
 
 /**
+ * Generates tailored clinical/botanical key benefits for a product
+ */
+export const getKeyBenefits = (product) => {
+  if (Array.isArray(product?.keyBenefits) && product.keyBenefits.length > 0) {
+    return product.keyBenefits;
+  }
+
+  const benefits = [];
+  const text = [
+    product?.name,
+    product?.category,
+    product?.subcategory,
+    product?.description,
+    ...(product?.tags || []),
+    ...(product?.ingredients || []),
+    ...(product?.skinType || []),
+  ]
+    .join(" ")
+    .toLowerCase();
+
+  if (text.includes("ceramide") || text.includes("barrier")) {
+    benefits.push("Restores & reinforces natural lipid skin barrier");
+  }
+  if (text.includes("hyaluronic") || text.includes("hydrat") || text.includes("snail") || text.includes("water")) {
+    benefits.push("Deep multi-depth cellular hydration & moisture lock");
+  }
+  if (text.includes("niacinamide") || text.includes("brighten") || text.includes("vitamin c")) {
+    benefits.push("Evens skin tone, fades spots & boosts natural radiance");
+  }
+  if (text.includes("salicylic") || text.includes("acne") || text.includes("zinc") || text.includes("bha")) {
+    benefits.push("Purifies pores & minimizes blemishes without stripping");
+  }
+  if (text.includes("centella") || text.includes("sooth") || text.includes("panthenol")) {
+    benefits.push("Calms redness, irritation & environmental stress");
+  }
+  if (text.includes("peptide") || text.includes("anti-aging") || text.includes("retinol") || text.includes("firm")) {
+    benefits.push("Firms skin texture & visibly smooths fine lines");
+  }
+  if (text.includes("sunscreen") || text.includes("spf")) {
+    benefits.push("Broad-spectrum UVA/UVB defense with invisible dewy finish");
+  }
+  if (text.includes("dry") || text.includes("winter") || text.includes("moistur")) {
+    benefits.push("Prevents seasonal flaking, windburn & tight dry patches");
+  }
+
+  if (benefits.length < 4) {
+    if (product?.category?.toLowerCase() === "facewash" || text.includes("cleanse")) {
+      benefits.push("Gently clarifies without compromising essential skin lipids");
+      benefits.push("Maintains natural skin pH and microbiome balance");
+    } else if (product?.category?.toLowerCase() === "serum") {
+      benefits.push("Ultra-light, fast-absorbing active botanical delivery");
+      benefits.push("Leaves skin soft, dewy, and noticeably refreshed");
+    } else if (product?.category?.toLowerCase()?.includes("cream")) {
+      benefits.push("Provides 24-hour continuous protective moisture seal");
+      benefits.push("Nourishes depleted skin with essential fatty acids");
+    } else {
+      benefits.push("Dermatologist tested, clean, and hypoallergenic formula");
+      benefits.push("100% cruelty-free botanical actives with zero synthetic dyes");
+    }
+  }
+
+  if (benefits.length < 4) {
+    benefits.push("Dermatologist tested, clean, and hypoallergenic formula");
+  }
+  if (benefits.length < 4) {
+    benefits.push("Safe for sensitive and daily AM/PM routine use");
+  }
+
+  return Array.from(new Set(benefits)).slice(0, 4);
+};
+
+/**
  * Normalizes product object to ensure consistent id, price, and images
  */
 export const normalizeProduct = (p) => {
@@ -40,11 +112,14 @@ export const normalizeProduct = (p) => {
             "https://images.pexels.com/photos/3762756/pexels-photo-3762756.jpeg",
         ];
   const images = rawList.map(sanitizeProductImageUrl);
+  const keyBenefits = getKeyBenefits(p);
+
   return {
     ...p,
     id,
     _id: p._id || id,
     slug,
+    keyBenefits,
     images,
     image: images[0],
   };

@@ -156,6 +156,7 @@ const AdminProducts = () => {
     skinType: "All skin types",
     ingredients: "",
     tags: "",
+    keyBenefits: "",
     rating: "4.8",
     reviewCount: "0",
     isFeatured: false,
@@ -226,6 +227,7 @@ const AdminProducts = () => {
       skinType: "All skin types",
       ingredients: "",
       tags: "",
+      keyBenefits: "",
       rating: "4.8",
       reviewCount: "0",
       isFeatured: false,
@@ -264,6 +266,9 @@ const AdminProducts = () => {
       tags: Array.isArray(p.tags)
         ? p.tags.join(", ")
         : p.tags || "",
+      keyBenefits: Array.isArray(p.keyBenefits)
+        ? p.keyBenefits.join(", ")
+        : p.keyBenefits || "",
       rating: p.rating !== undefined && p.rating !== null ? String(p.rating) : "4.8",
       reviewCount:
         p.reviewCount !== undefined && p.reviewCount !== null
@@ -462,6 +467,13 @@ const AdminProducts = () => {
           ? form.tags
           : [];
 
+      const keyBenefitsArr =
+        typeof form.keyBenefits === "string"
+          ? form.keyBenefits.split(/,|\n/).map((s) => s.trim()).filter(Boolean)
+          : Array.isArray(form.keyBenefits)
+          ? form.keyBenefits
+          : [];
+
       const payload = {
         name: form.name.trim(),
         brand: form.brand.trim(),
@@ -481,6 +493,7 @@ const AdminProducts = () => {
         skinType: skinTypeArr,
         ingredients: ingredientsArr,
         tags: tagsArr,
+        keyBenefits: keyBenefitsArr,
         rating:
           form.rating !== "" && !isNaN(Number(form.rating))
             ? parseFloat(form.rating)
@@ -1077,6 +1090,19 @@ const AdminProducts = () => {
                       onChange={(e) => setForm({ ...form, tags: e.target.value })}
                       className="w-full px-3.5 py-2.5 text-xs bg-skin-cream/20 border border-skin-sand/60 rounded-xl focus:border-skin-terracotta focus:outline-none"
                       placeholder="oil control, acne treatment"
+                    />
+                  </div>
+
+                  <div className="space-y-1 sm:col-span-3">
+                    <label className="text-[10px] uppercase tracking-wider font-bold text-skin-charcoal/60">
+                      Key Benefits (Comma or newline separated)
+                    </label>
+                    <input
+                      type="text"
+                      value={form.keyBenefits}
+                      onChange={(e) => setForm({ ...form, keyBenefits: e.target.value })}
+                      className="w-full px-3.5 py-2.5 text-xs bg-skin-cream/20 border border-skin-sand/60 rounded-xl focus:border-skin-terracotta focus:outline-none"
+                      placeholder="Deeply hydrates, Restores skin barrier, Calms redness & irritation"
                     />
                   </div>
                 </div>

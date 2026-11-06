@@ -45,9 +45,21 @@ export default function ProductDetailsClient({ product, relatedProducts = [] }) 
   );
   const [quantity, setQuantity] = useState(1);
   const [isWishlisted, setIsWishlisted] = useState(false);
-  const [activeTab, setActiveTab] = useState("description"); // "description" | "ingredients" | "skinType" | "shipping"
+  const [activeTab, setActiveTab] = useState("description"); // "description" | "benefits" | "ingredients" | "skinType" | "shipping"
   const [addedSuccess, setAddedSuccess] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
+
+  const fallbackBenefits = [
+    "Deeply hydrates and reinforces skin's natural moisture barrier",
+    "Soothes redness and protects against environmental stress",
+    "Improves elasticity for a firmer, radiant complexion",
+    "Clean, hypoallergenic formula safe for daily AM & PM use",
+  ];
+
+  const benefitsList =
+    Array.isArray(product?.keyBenefits) && product.keyBenefits.length > 0
+      ? product.keyBenefits
+      : fallbackBenefits;
 
   // Review submission state
   const [showReviewForm, setShowReviewForm] = useState(false);
@@ -435,6 +447,33 @@ export default function ProductDetailsClient({ product, relatedProducts = [] }) 
               </p>
             )}
 
+            {/* ── PRODUCT KEY BENEFITS ── */}
+            {benefitsList.length > 0 && (
+              <div className="p-4 sm:p-4.5 rounded-2xl bg-gradient-to-br from-white via-[#FCFAF7] to-skin-sand/20 border border-skin-sand/80 shadow-2xs space-y-3">
+                <div className="flex items-center gap-2">
+                  <span className="w-5 h-5 rounded-full bg-skin-terracotta/10 text-skin-terracotta flex items-center justify-center shrink-0">
+                    <HiSparkles size={12} />
+                  </span>
+                  <h3 className="text-xs uppercase tracking-[0.16em] font-bold text-skin-charcoal">
+                    Key Benefits:
+                  </h3>
+                </div>
+                <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-0.5">
+                  {benefitsList.map((benefit, idx) => (
+                    <li
+                      key={idx}
+                      className="flex items-start gap-2 text-xs text-skin-charcoal/85 leading-snug"
+                    >
+                      <span className="w-4 h-4 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200/60 flex items-center justify-center shrink-0 mt-0.5">
+                        <FiCheck size={10} className="stroke-[2.5]" />
+                      </span>
+                      <span>{benefit}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
             {/* Quantity Selector & Purchase Actions */}
             <div className="space-y-3.5 pt-1">
               <div className="flex items-center gap-3">
@@ -535,6 +574,7 @@ export default function ProductDetailsClient({ product, relatedProducts = [] }) 
               <div className="flex border-b border-skin-sand/60 gap-4 sm:gap-6 overflow-x-auto scrollbar-none">
                 {[
                   { id: "description", label: "The Ritual" },
+                  { id: "benefits", label: "Key Benefits" },
                   { id: "ingredients", label: "Key Actives" },
                   { id: "skinType", label: "Skin Types" },
                   { id: "shipping", label: "Delivery" },
@@ -572,6 +612,32 @@ export default function ProductDetailsClient({ product, relatedProducts = [] }) 
                     <p className="font-serif italic text-skin-charcoal/70 bg-skin-sand/30 p-3 rounded-xl border border-skin-sand/40">
                       ✦ Recommended Ritual: Dispense an appropriate amount onto cleansed fingertips. Press gently into the face and neck using upward motions until fully absorbed. Follow with your preferred SkinAura moisturizer or night cream.
                     </p>
+                  </div>
+                )}
+
+                {activeTab === "benefits" && (
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                      {benefitsList.map((b, i) => (
+                        <div
+                          key={i}
+                          className="flex items-start gap-2.5 p-3 rounded-xl bg-white border border-skin-sand/60 shadow-2xs"
+                        >
+                          <span className="w-5 h-5 rounded-full bg-skin-terracotta/10 text-skin-terracotta flex items-center justify-center shrink-0 mt-0.5">
+                            <HiSparkles size={12} />
+                          </span>
+                          <span className="text-xs font-semibold text-skin-charcoal leading-snug">
+                            {b}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="p-3 rounded-xl bg-skin-sand/20 border border-skin-sand/40 text-[11px] text-skin-charcoal/70 flex items-center gap-2">
+                      <FiShield className="text-skin-sage shrink-0" size={14} />
+                      <span>
+                        Formulated with clean, bio-compatible actives to deliver sustained clinical results without compromising sensitive skin barriers.
+                      </span>
+                    </div>
                   </div>
                 )}
 
