@@ -7,6 +7,7 @@ import FeatureProducts from "./components/FeatureProducts";
 import OfferMarquee from "./components/OfferMarquee";
 import About from "./components/About";
 import CtaSection from "./components/CtaSection";
+import { getBanners } from "./lib/api/banners";
 import { getCategories } from "./lib/api/categories";
 import {
   getTopSellingProducts,
@@ -20,6 +21,7 @@ export const revalidate = 300; // Cache homepage for 5 minutes
 export default async function Home() {
   // Fetch initial homepage data concurrently on the server
   const [
+    banners,
     categories,
     topSelling,
     winterProducts,
@@ -27,6 +29,7 @@ export default async function Home() {
     serumProducts,
     creamProducts,
   ] = await Promise.all([
+    getBanners(),
     getCategories(),
     getTopSellingProducts(12),
     getWinterCollectionProducts(8),
@@ -37,7 +40,7 @@ export default async function Home() {
 
   return (
     <main>
-      <HeroBanner />
+      <HeroBanner initialSlides={banners} />
       <OfferMarquee />
       <CategorySection initialCategories={categories} />
       <TopSellingProducts initialProducts={topSelling} />

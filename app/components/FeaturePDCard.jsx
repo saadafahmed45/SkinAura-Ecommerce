@@ -3,8 +3,9 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { FaStar } from "react-icons/fa";
-import { FiShoppingBag, FiHeart } from "react-icons/fi";
+import { FiShoppingBag, FiHeart, FiZap } from "react-icons/fi";
 import { useCart } from "../context/CartContext";
 
 const FeaturePDCard = ({ product }) => {
@@ -48,6 +49,7 @@ const FeaturePDCard = ({ product }) => {
     setImgSrc(getSafeImage(images?.[0] || product.image || defaultFallback));
   }, [images, product.image]);
 
+  const router = useRouter();
   const { handleAddedCart } = useCart();
 
   const isNew =
@@ -60,6 +62,13 @@ const FeaturePDCard = ({ product }) => {
     e.preventDefault();
     e.stopPropagation();
     handleAddedCart(product);
+  };
+
+  const handleBuyNow = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    handleAddedCart(product, 1, true);
+    router.push("/cart");
   };
 
   return (
@@ -171,24 +180,42 @@ const FeaturePDCard = ({ product }) => {
         </div>
       </div>
 
-      {/* Action Button: Luxury Solid Charcoal to Terracotta - Never wraps */}
+      {/* Action Buttons: Add to Cart & Buy Now */}
       <div className="px-3 pb-3 sm:px-4 sm:pb-4 pt-0 mt-auto">
-        <button
-          onClick={handleAddToCart}
-          disabled={inStock === false}
-          aria-label={`Add ${name} to cart`}
-          className={`w-full h-9 sm:h-10 px-2 sm:px-3 rounded-xl text-[11px] sm:text-xs uppercase tracking-wider font-bold transition-all duration-300 flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer shadow-xs whitespace-nowrap ${
-            inStock !== false
-              ? "bg-skin-charcoal text-white hover:bg-skin-terracotta active:scale-[0.98] hover:shadow-md"
-              : "bg-skin-sand text-skin-charcoal/40 cursor-not-allowed"
-          }`}
-        >
-          <FiShoppingBag
-            size={14}
-            className="shrink-0 transition-transform group-hover:scale-110"
-          />
-          <span className="whitespace-nowrap">{inStock !== false ? "Add to Cart" : "Out of Stock"}</span>
-        </button>
+        {inStock !== false ? (
+          <div className="grid grid-cols-2 gap-1.5 sm:gap-2">
+            <button
+              type="button"
+              onClick={handleAddToCart}
+              aria-label={`Add ${name} to cart`}
+              title="Add to Cart"
+              className="h-9 sm:h-10 px-1.5 sm:px-2 rounded-xl text-[10px] sm:text-[11px] uppercase tracking-wider font-bold transition-all duration-300 flex items-center justify-center gap-1 cursor-pointer border border-skin-sand bg-skin-cream/40 text-skin-charcoal hover:bg-skin-sand/60 hover:border-skin-terracotta/40 active:scale-[0.98] whitespace-nowrap shadow-2xs"
+            >
+              <FiShoppingBag size={13} className="shrink-0 transition-transform group-hover:scale-110" />
+              <span>Add<span className="hidden sm:inline"> to Cart</span></span>
+            </button>
+
+            <button
+              type="button"
+              onClick={handleBuyNow}
+              aria-label={`Buy ${name} now`}
+              title="Buy Now"
+              className="h-9 sm:h-10 px-1.5 sm:px-2 rounded-xl text-[10px] sm:text-[11px] uppercase tracking-wider font-bold transition-all duration-300 flex items-center justify-center gap-1 cursor-pointer bg-skin-charcoal text-white hover:bg-skin-terracotta active:scale-[0.98] shadow-xs hover:shadow-md whitespace-nowrap"
+            >
+              <FiZap size={12} className="shrink-0 text-amber-300" />
+              <span>Buy Now</span>
+            </button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            disabled
+            className="w-full h-9 sm:h-10 px-3 rounded-xl text-[11px] sm:text-xs uppercase tracking-wider font-bold bg-skin-sand text-skin-charcoal/40 cursor-not-allowed flex items-center justify-center gap-1.5 whitespace-nowrap"
+          >
+            <FiShoppingBag size={14} className="shrink-0" />
+            <span>Out of Stock</span>
+          </button>
+        )}
       </div>
     </div>
   );

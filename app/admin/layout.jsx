@@ -15,6 +15,7 @@ import {
   FiMenu,
   FiX,
   FiShield,
+  FiSliders,
 } from "react-icons/fi";
 
 const AdminLayout = ({ children }) => {
@@ -85,6 +86,7 @@ const AdminLayout = ({ children }) => {
 
   const navItems = [
     { label: "Overview", href: "/admin", icon: FiGrid },
+    { label: "Hero Banners", href: "/admin/banners", icon: FiSliders },
     { label: "Products", href: "/admin/products", icon: FiBox },
     { label: "Categories", href: "/admin/categories", icon: FiLayers },
     { label: "Orders", href: "/admin/orders", icon: FiShoppingBag },
